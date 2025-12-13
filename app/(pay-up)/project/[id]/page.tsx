@@ -1,13 +1,13 @@
 'use client';
 
-import { Card, CardContent, CardHeader, Icon, IconButton, Skeleton, Stack, Typography } from "@mui/material";
+import { Card, CardContent, CardHeader, Icon, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ProjectContext } from "../../_libs/contexts";
+import { getProject } from "../../_libs/data";
 import { Project } from "../../_libs/models";
 import CardExpenses from "./card-expenses";
-import { getProject } from "../../_libs/data";
-import { ProjectContext } from "../../_libs/contexts";
-import dayjs from "dayjs";
 import DialogProject from "./dialog-project";
 
 export default function Page() {
@@ -35,12 +35,12 @@ export default function Page() {
                         <Card>
                             <CardHeader
                                 title={project.title}
-                                slotProps={{ title: { color: 'primary', variant: 'h4' } }}
+                                slotProps={{ title: { color: 'primary' } }}
                                 subheader={dayjs(project.date).format('MM/DD/YYYY')}
                                 action={<IconButton onClick={() => setOpen(true)}><Icon>settings</Icon></IconButton>}
                             />
                             <CardContent>
-                                <Typography>{project.description}</Typography>
+                                <Typography whiteSpace="pre-line">{project.description}</Typography>
                             </CardContent>
                         </Card>
                         <CardExpenses />
@@ -48,7 +48,7 @@ export default function Page() {
                     {open && <DialogProject onClose={() => setOpen(false)} />}
                 </ProjectContext.Provider>
                 :
-                <Skeleton />
+                <LinearProgress />
             }
         </>
     );

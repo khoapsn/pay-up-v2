@@ -1,3 +1,9 @@
+export type ProjectSummary = {
+    id: string,
+    title: string,
+    last_opened: string,
+}
+
 export type Project = {
     id: string,
     title: string,

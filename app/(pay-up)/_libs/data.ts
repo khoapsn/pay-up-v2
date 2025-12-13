@@ -1,13 +1,28 @@
 'use server';
 
-import { Expense, Project } from "./models";
+import { Expense, Project, ProjectSummary } from "./models";
 import { SampleMembers } from "./sample";
+
+export const getProjects = async (): Promise<ProjectSummary[]> => {
+    return [
+        {
+            id: 'abc',
+            title: 'Japan 2026',
+            last_opened: '2025-12-13 10:15',
+        },
+        {
+            id: 'def',
+            title: 'Project 02',
+            last_opened: '2025-12-13 8:20',
+        },
+    ];
+}
 
 export const getProject = async (id: string): Promise<Project> => {
     return {
         id,
         title: 'Japan 2026',
-        description: 'Some description here.',
+        description: 'Some description here.\r\nHehe',
         date: '2026-04-01',
         currencies: {
             base: 'VND',
