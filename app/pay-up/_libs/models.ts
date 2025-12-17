@@ -1,8 +1,14 @@
+export type ProjectSummary = {
+    id: string,
+    title: string,
+    lastOpened: string,
+}
+
 export type Project = {
     id: string,
     title: string,
     description?: string,
-    date: string,
+    date: Date,
     currencies: {
         base: string,
         others: Currency[],

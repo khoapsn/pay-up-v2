@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, CardHeader, Icon } from "@mui/material";
-import { DataGrid, GridActionsCellItem, GridColDef, GridSortModel } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { useProject } from "../../_libs/contexts";
@@ -86,6 +86,7 @@ export default function CardExpenses() {
                 <DataGrid
                     rows={rows}
                     columns={columns}
+                    loading={!rows}
                     initialState={{
                         sorting: { sortModel },
                         columns: { columnVisibilityModel: { id: false } },
@@ -93,6 +94,8 @@ export default function CardExpenses() {
                     }}
                     onRowClick={() => console.log('row clicked')}
                     showToolbar
+                    autosizeOnMount
+                    autoHeight
                 />
             </CardContent>
         </Card>
