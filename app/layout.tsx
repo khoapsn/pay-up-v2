@@ -6,6 +6,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import Wrapper from "./_libs/wrapper";
 
 export const metadata: Metadata = {
     title: "Pay Up!",
@@ -24,7 +25,9 @@ export default function RootLayout({
             </head>
             <body>
                 <AppRouterCacheProvider>
-                    {children}
+                    <Wrapper>
+                        {children}
+                    </Wrapper>
                 </AppRouterCacheProvider>
             </body>
         </html>

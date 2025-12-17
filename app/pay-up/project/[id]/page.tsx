@@ -1,5 +1,6 @@
 'use client';
 
+import { useToast } from "@/app/_libs/contexts";
 import { Card, CardContent, CardHeader, Icon, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
@@ -14,12 +15,13 @@ export default function Page() {
     const { id } = useParams<{ id: string }>();
     const [project, setProject] = useState<Project>();
     const [open, setOpen] = useState(false);
+    const toast = useToast();
 
     const refresh = async () => {
         try {
             setProject(await getProject(id));
         } catch (e) {
-
+            toast('Error', String(e), 'error');
         }
     };
 
@@ -45,7 +47,7 @@ export default function Page() {
                         </Card>
                         <CardExpenses />
                     </Stack>
-                    {open && <DialogProject onClose={() => setOpen(false)} />}
+                    {open && <DialogProject onSave={refresh} onClose={() => setOpen(false)} />}
                 </ProjectContext.Provider>
                 :
                 <LinearProgress />
