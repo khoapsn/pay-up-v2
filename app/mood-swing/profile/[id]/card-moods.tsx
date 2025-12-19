@@ -68,7 +68,7 @@ export default function CardMoods() {
                                             sx={{ p: 0, opacity: f ? 1 : 0 }}
                                             disabled={f?.isAfter(today)}
                                         >
-                                            <p>{`${moods.find(g => dayjs(g.date).isSame(f))?.value}`}</p>
+                                            <p>{`${moods.find(g => dayjs(g.date).isSame(f, 'day'))?.value}`}</p>
                                             <p>{f.toString()}</p>
                                             <Icon
                                                 sx={{
