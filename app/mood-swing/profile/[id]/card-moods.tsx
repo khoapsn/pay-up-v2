@@ -57,7 +57,6 @@ export default function CardMoods() {
                     </IconButton>
                 </Stack>
                 <Stack spacing={2.5}>
-                    {moods.map(e => <p key={e.date.toString()}>{e.date.toString()} {e.value}</p>)}
                     {Array(6).fill(0).map((_, i) => (
                         <Stack key={i} direction={"row"} justifyContent={"space-between"}>
                             {dots.slice(7 * i, 7 * (i + 1)).map((f, j) =>
@@ -68,8 +67,6 @@ export default function CardMoods() {
                                             sx={{ p: 0, opacity: f ? 1 : 0 }}
                                             disabled={f?.isAfter(today)}
                                         >
-                                            <p>{`${moods.find(g => dayjs(g.date).isSame(f, 'day'))?.value}`}</p>
-                                            <p>{f.toString()}</p>
                                             <Icon
                                                 sx={{
                                                     color:
