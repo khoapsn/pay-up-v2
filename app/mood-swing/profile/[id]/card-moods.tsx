@@ -26,7 +26,7 @@ export default function CardMoods() {
 
     const refresh = async () => {
         try {
-            setMoods(await getMoods(profile.id, viewDate.month() + 1, viewDate.year()));
+            setMoods((await getMoods(profile.id, viewDate.month() + 1, viewDate.year())).data);
         } catch (e) {
             toast('Error', String(e), 'error');
         }

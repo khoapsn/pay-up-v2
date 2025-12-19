@@ -16,7 +16,7 @@ export const postProfile = async (name: string): Promise<string> => {
     return data[0].id;
 }
 
-export const getMoods = async (profileId: string, month: number, year: number): Promise<Mood[]> => {
+export const getMoods = async (profileId: string, month: number, year: number): Promise<{ data: Mood[], text?: string }> => {
     const data = await sql`
         SELECT *
         FROM mood_swing.moods
@@ -24,7 +24,7 @@ export const getMoods = async (profileId: string, month: number, year: number): 
         AND DATE_PART('month', date)=${month}
         AND DATE_PART('year', date)=${year}
     ` as Mood[];
-    return data;
+    return { data, text: data[0].date.toString() };
 }
 
 export const putMood = async (profileId: string, date: Date, value: MoodValue) => {
