@@ -16,18 +16,18 @@ export const postProfile = async (name: string): Promise<string> => {
     return data[0].id;
 }
 
-export const getMoods = async (profileId: string, month: number, year: number): Promise<{ data: Mood[], text?: string }> => {
+export const getMoods = async (profileId: string, month: number, year: number): Promise<Mood[]> => {
     const data = await sql`
         SELECT *
         FROM mood_swing.moods
-        WHERE profile_id=${profileId}
-        AND DATE_PART('month', date)=${month}
-        AND DATE_PART('year', date)=${year}
+        WHERE
+            profile_id=${profileId}
+            AND date LIKE ${`${year}-${month}-%`}
     ` as Mood[];
-    return { data, text: data[0].date.toString() };
+    return data;
 }
 
-export const putMood = async (profileId: string, date: Date, value: MoodValue) => {
+export const putMood = async (profileId: string, date: string, value: MoodValue) => {
     await sql`
         INSERT INTO mood_swing.moods (profile_id, date, value)
         VALUES (${profileId},${date},${value})

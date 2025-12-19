@@ -26,7 +26,7 @@ export default function CardMoods() {
 
     const refresh = async () => {
         try {
-            setMoods((await getMoods(profile.id, viewDate.month() + 1, viewDate.year())).data);
+            setMoods(await getMoods(profile.id, viewDate.month() + 1, viewDate.year()));
         } catch (e) {
             toast('Error', String(e), 'error');
         }
@@ -139,7 +139,7 @@ function DialogMoodPicker({
             setValue(newValue);
 
             if (newValue !== value)
-                await putMood(profile.id, date.toDate(), newValue);
+                await putMood(profile.id, date.format('YYYY-MM-DD'), newValue);
             else
                 await deleteMood(profile.id, date.toDate());
 

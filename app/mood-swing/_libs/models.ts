@@ -5,7 +5,7 @@ export type Profile = {
 
 export type Mood = {
     profileId: string,
-    date: Date,
+    date: string,
     value: MoodValue,
 }
 
