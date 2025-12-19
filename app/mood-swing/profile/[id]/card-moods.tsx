@@ -74,7 +74,7 @@ export default function CardMoods() {
                                                 sx={{
                                                     color:
                                                         f?.isAfter(today) ? 'primary.light' :
-                                                            (moodValueOptions.find(h => h.value === moods.find(g => dayjs(g.date).isSame(f))?.value)?.color || 'primary.main')
+                                                            (moodValueOptions.find(h => h.value === moods.find(g => dayjs(g.date).isSame(f, 'day'))?.value)?.color || 'primary.main')
                                                 }}
                                                 fontSize="large"
                                             >
