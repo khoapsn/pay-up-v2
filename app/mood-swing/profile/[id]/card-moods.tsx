@@ -4,8 +4,8 @@ import { DateCalendar } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { useProfile } from "../../_libs/contexts";
-import { getMoods } from "../../_libs/data";
-import { Mood, moodValueOptions } from "../../_libs/models";
+import { deleteMood, getMoods, putMood } from "../../_libs/data";
+import { Mood, MoodValue, moodValueOptions } from "../../_libs/models";
 
 const today = dayjs().startOf('day');
 const defaultViewDate = dayjs().startOf('month');
@@ -97,10 +97,9 @@ export default function CardMoods() {
             <Dialog open={openCalendar} onClose={() => setOpenCalendar(false)}>
                 <DateCalendar
                     value={viewDate}
+                    openTo="month"
                     views={['year', 'month']}
-                    onChange={(value, state) => {
-                        if (state === 'finish') changeViewDate(value);
-                    }}
+                    onChange={(value, state) => { if (state === 'finish') changeViewDate(value) }}
                 />
                 <DialogActions>
                     <Button onClick={() => changeViewDate()} variant="outlined">Today</Button>
@@ -108,8 +107,9 @@ export default function CardMoods() {
             </Dialog>
             {pickedDate &&
                 <DialogMoodPicker
-                    pickedDate={pickedDate}
+                    date={pickedDate}
                     mood={moods.find(e => dayjs(e.date).isSame(pickedDate, 'day'))}
+                    onChange={refresh}
                     onClose={() => setPickedDate(undefined)}
                 />
             }
@@ -119,23 +119,49 @@ export default function CardMoods() {
 
 function DialogMoodPicker({
     mood,
-    pickedDate,
+    date,
+    onChange,
     onClose,
 }: {
     mood?: Mood,
-    pickedDate: Dayjs,
+    date: Dayjs,
+    onChange: () => Promise<void>,
     onClose: () => void,
 }) {
+    const profile = useProfile();
+    const [value, setValue] = useState(mood?.value);
+    const [loading, setLoading] = useState(false);
+    const toast = useToast();
+
+    const handleClick = async (newValue: MoodValue) => {
+        try {
+            setLoading(true);
+            setValue(newValue);
+
+            if (newValue !== value)
+                await putMood(profile.id, date.toDate(), newValue);
+            else
+                await deleteMood(profile.id, date.toDate());
+
+            await onChange();
+            onClose();
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <Dialog open onClose={onClose} fullWidth>
+        <Dialog open onClose={onClose} fullWidth maxWidth="xs">
             <DialogTitle>Set the mood</DialogTitle>
             <DialogContent dividers>
                 <List>
                     {moodValueOptions.map(e =>
-                        <ListItemButton key={e.value}>
+                        <ListItemButton key={e.value} onClick={() => handleClick(e.value)} disabled={loading}>
                             <ListItemIcon>
                                 <Icon fontSize="large" sx={{ color: e.color }}>
-                                    {e.value === mood?.value ? 'check_circle' : 'circle'}
+                                    {e.value === value ? 'check_circle' : 'circle'}
                                 </Icon>
                             </ListItemIcon>
                             <ListItemText sx={{ textTransform: 'capitalize' }}>{e.value}</ListItemText>

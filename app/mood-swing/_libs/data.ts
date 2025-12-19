@@ -1,7 +1,7 @@
 'use server';
 
 import { neon } from "@neondatabase/serverless";
-import { Mood, Profile } from "./models";
+import { Mood, MoodValue, Profile } from "./models";
 
 const connectionString = process.env.DATABASE_URL ?? '';
 const sql = neon(connectionString);
@@ -26,3 +26,17 @@ export const getMoods = async (profileId: string, month: number, year: number): 
     ` as Mood[];
     return data;
 }
+
+export const putMood = async (profileId: string, date: Date, value: MoodValue) => {
+    await sql`
+        INSERT INTO mood_swing.moods (profile_id, date, value)
+        VALUES (${profileId},${date},${value})
+        ON CONFLICT (profile_id, date)
+        DO UPDATE SET value=${value}
+    `;
+}
+
+export const deleteMood = async (profileId: string, date: Date) => {
+    await sql`DELETE FROM mood_swing.moods WHERE profile_id=${profileId} AND date=${date}`;
+}
+

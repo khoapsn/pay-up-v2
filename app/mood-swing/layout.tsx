@@ -20,7 +20,7 @@ const theme = createTheme({
                 },
             },
         },
-    }
+    },
 });
 
 export default function Layout({ children }: { children: ReactNode }) {
