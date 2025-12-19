@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <Box display="flex" sx={{ bgcolor: '#f5f5f5', height: '100vh' }}>
             <CssBaseline />
             <Header />
-            <SideNav />
+            {/* <SideNav /> */}
             <Container>
                 <Toolbar sx={{ mb: 2 }} />
                 {children}

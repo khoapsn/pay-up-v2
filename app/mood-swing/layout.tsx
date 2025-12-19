@@ -1,16 +1,38 @@
 'use client';
 
-import { AppBar, Box, Container, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Container, createTheme, ThemeProvider, Toolbar, Typography } from "@mui/material";
 import { ReactNode } from "react";
+import { grey as themeColor } from "@mui/material/colors";
+
+const theme = createTheme({
+    palette: {
+        primary: {
+            ...themeColor,
+            "main": themeColor[900],
+            "light": themeColor[300],
+        },
+    },
+    components: {
+        MuiIconButton: {
+            defaultProps: {
+                sx: {
+                    color: themeColor[900],
+                },
+            },
+        },
+    }
+});
 
 export default function Layout({ children }: { children: ReactNode }) {
     return (
-        <Box sx={{ bgcolor: '#f5f5f5', height: '100vh' }}>
-            <Header />
-            <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
-                {children}
-            </Container>
-        </Box>
+        <ThemeProvider theme={theme}>
+            <Box sx={{ bgcolor: themeColor[100], height: '100vh' }}>
+                <Header />
+                <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
+                    {children}
+                </Container>
+            </Box>
+        </ThemeProvider>
     );
 }
 
@@ -19,8 +41,8 @@ function Header() {
         <>
             <AppBar position="fixed" sx={{ zIndex: 1 }}>
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        <i>MOOD SWING~</i>
+                    <Typography variant="h6" component="div" fontWeight={700} sx={{ flexGrow: 1 }}>
+                        mood swing
                     </Typography>
                 </Toolbar>
             </AppBar>

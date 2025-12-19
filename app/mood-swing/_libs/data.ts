@@ -12,15 +12,17 @@ export const getProfile = async (id: string): Promise<Profile> => {
 }
 
 export const postProfile = async (name: string): Promise<string> => {
-    return '';
+    const data = await sql`INSERT INTO mood_swing.profiles (name) VALUES (${name}) RETURNING id` as { id: string }[];
+    return data[0].id;
 }
 
-export const getMoods = async (profileId: string, month: number): Promise<Mood[]> => {
+export const getMoods = async (profileId: string, month: number, year: number): Promise<Mood[]> => {
     const data = await sql`
         SELECT *
         FROM mood_swing.moods
         WHERE profile_id=${profileId}
         AND DATE_PART('month', date)=${month}
+        AND DATE_PART('year', date)=${year}
     ` as Mood[];
     return data;
 }
