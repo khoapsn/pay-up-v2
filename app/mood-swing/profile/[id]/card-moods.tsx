@@ -141,7 +141,7 @@ function DialogMoodPicker({
             if (newValue !== value)
                 await putMood(profile.id, date.format('YYYY-MM-DD'), newValue);
             else
-                await deleteMood(profile.id, date.toDate());
+                await deleteMood(profile.id, date.format('YYYY-MM-DD'));
 
             await onChange();
             onClose();

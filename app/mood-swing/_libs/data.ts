@@ -36,7 +36,7 @@ export const putMood = async (profileId: string, date: string, value: MoodValue)
     `;
 }
 
-export const deleteMood = async (profileId: string, date: Date) => {
+export const deleteMood = async (profileId: string, date: string) => {
     await sql`DELETE FROM mood_swing.moods WHERE profile_id=${profileId} AND date=${date}`;
 }
 
