@@ -3,23 +3,28 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Icon, I
 import { DateCalendar } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
-import { useProfile } from "../../_libs/contexts";
+import { useProfile, useSettingsState } from "../../_libs/contexts";
 import { deleteMood, getMoods, putMood } from "../../_libs/data";
 import { Mood, MoodValue, moodValueOptions } from "../../_libs/models";
 
 const today = dayjs().startOf('day');
 const defaultViewDate = dayjs().startOf('month');
 
-export default function CardMoods() {
+export default function CardMoods({
+    onOpenSettings,
+}: {
+    onOpenSettings: () => void,
+}) {
     const profile = useProfile();
     const [viewDate, setViewDate] = useState(defaultViewDate);
     const [moods, setMoods] = useState<Mood[]>([]);
     const [openCalendar, setOpenCalendar] = useState(false);
     const [pickedDate, setPickedDate] = useState<Dayjs>();
+    const [settings] = useSettingsState();
     const toast = useToast();
 
     const dots: (Dayjs | null)[] = [
-        ...Array(viewDate.day()).fill(null),
+        ...Array((settings.weekStartOnSunday ? viewDate.day() : (viewDate.day() || 7) - 1)).fill(null),
         ...[...Array(viewDate.daysInMonth())].map((e, i) => viewDate.date(i + 1)),
         ...Array(8).fill(null),
     ];
@@ -35,6 +40,10 @@ export default function CardMoods() {
     useEffect(() => {
         refresh();
     }, [viewDate]);
+
+    useEffect(() => {
+
+    }, []);
 
     const changeViewDate = (value?: Dayjs | null) => {
         setViewDate(value ?? defaultViewDate);
@@ -91,7 +100,7 @@ export default function CardMoods() {
                         <Icon>event</Icon>
                     </IconButton>
                     <IconButton><Icon>leaderboard</Icon></IconButton>
-                    <IconButton><Icon>settings</Icon></IconButton>
+                    <IconButton onClick={() => onOpenSettings()}><Icon>settings</Icon></IconButton>
                 </Stack>
             </Stack>
             <Dialog open={openCalendar} onClose={() => setOpenCalendar(false)}>
@@ -158,7 +167,12 @@ function DialogMoodPicker({
             <DialogContent dividers>
                 <List>
                     {moodValueOptions.map(e =>
-                        <ListItemButton key={e.value} onClick={() => handleClick(e.value)} disabled={loading}>
+                        <ListItemButton
+                            key={e.value}
+                            onClick={() => handleClick(e.value)}
+                            selected={e.value === value}
+                            disabled={loading}
+                        >
                             <ListItemIcon>
                                 <Icon fontSize="large" sx={{ color: e.color }}>
                                     {e.value === value ? 'check_circle' : 'circle'}

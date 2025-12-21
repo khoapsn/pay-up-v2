@@ -23,9 +23,13 @@ export type MoodValueOption = {
 }
 
 export const moodValueOptions: MoodValueOption[] = [
-    { value: MoodValue.Joyful, color: '#ffeb3b' },
-    { value: MoodValue.Neutral, color: '#8bc34a' },
-    { value: MoodValue.Sad, color: '#2196f3' },
-    { value: MoodValue.Tired, color: '#673ab7' },
-    { value: MoodValue.Angry, color: '#f44336' },
+    { value: MoodValue.Joyful, color: '#ffcc00' },
+    { value: MoodValue.Neutral, color: '#35c759' },
+    { value: MoodValue.Sad, color: '#027aff' },
+    { value: MoodValue.Tired, color: '#af52de' },
+    { value: MoodValue.Angry, color: '#ff3b30' },
 ]
+
+export type Settings = {
+    weekStartOnSunday: boolean,
+}

@@ -1,8 +1,10 @@
 'use client';
 
 import { AppBar, Box, Container, createTheme, ThemeProvider, Toolbar, Typography } from "@mui/material";
-import { ReactNode } from "react";
 import { grey as themeColor } from "@mui/material/colors";
+import { ReactNode, useEffect, useState } from "react";
+import { SettingsStateContext } from "./_libs/contexts";
+import { Settings } from "./_libs/models";
 
 const theme = createTheme({
     palette: {
@@ -24,14 +26,30 @@ const theme = createTheme({
 });
 
 export default function Layout({ children }: { children: ReactNode }) {
+    const settingsState = useState<Settings>({
+        weekStartOnSunday: false,
+    });
+    const [settings, setSettings] = settingsState;
+    const ready = !!settings;
+
+    useEffect(() => {
+        setSettings({
+            weekStartOnSunday: localStorage.getItem('weekStartOnSunday') === 'true',
+        });
+    }, []);
+
     return (
         <ThemeProvider theme={theme}>
-            <Box sx={{ bgcolor: themeColor[100], height: '100vh' }}>
-                <Header />
-                <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
-                    {children}
-                </Container>
-            </Box>
+            {ready &&
+                <SettingsStateContext value={settingsState}>
+                    <Box sx={{ bgcolor: themeColor[100], minHeight: '100vh' }}>
+                        <Header />
+                        <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
+                            {children}
+                        </Container>
+                    </Box>
+                </SettingsStateContext>
+            }
         </ThemeProvider>
     );
 }

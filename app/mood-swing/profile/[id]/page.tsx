@@ -1,17 +1,18 @@
 'use client';
 
 import { useToast } from "@/app/_libs/contexts";
-import { LinearProgress } from "@mui/material";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ProfileContext } from "../../_libs/contexts";
 import { getProfile } from "../../_libs/data";
 import { Profile } from "../../_libs/models";
 import CardMoods from "./card-moods";
+import DialogSettings from "./dialog-settings";
 
 export default function Page() {
     const { id } = useParams<{ id: string }>();
     const [profile, setProfile] = useState<Profile>();
+    const [openSettings, setOpenSettings] = useState(false);
     const toast = useToast();
 
     const refresh = async () => {
@@ -23,17 +24,22 @@ export default function Page() {
     };
 
     useEffect(() => {
+        localStorage.setItem('profileId', id);
+    }, []);
+
+    useEffect(() => {
         refresh();
     }, []);
 
     return (
         <>
-            {profile ?
+            {profile &&
                 <ProfileContext.Provider value={profile}>
-                    <CardMoods />
+                    <CardMoods onOpenSettings={() => setOpenSettings(true)} />
+                    {openSettings &&
+                        <DialogSettings onClose={() => setOpenSettings(false)} />
+                    }
                 </ProfileContext.Provider>
-                :
-                <LinearProgress />
             }
         </>
     );
