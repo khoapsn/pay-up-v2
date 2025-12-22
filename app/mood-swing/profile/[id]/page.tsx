@@ -10,8 +10,9 @@ import { ProfileContext } from "../../_libs/contexts";
 import { getProfile } from "../../_libs/data";
 import { Profile } from "../../_libs/models";
 import CardMoods from "./card-moods";
+import DialogOverview from "./dialog-overview";
 import DialogSettings from "./dialog-settings";
-import DialogStats from "./dialog-stats";
+import { storeProfile } from "../../_libs/utils";
 
 const defaultViewDate = dayjs().startOf('month');
 
@@ -26,7 +27,7 @@ export default function Page() {
             try {
                 const data = await getProfile(id);
                 setProfile(data);
-                localStorage.setItem('profileId', id);
+                storeProfile(data);
                 toast(`Welcome back, ${data.name}`, 'How are we feeling today?')
             } catch (e) {
                 toast('Error', String(e), 'error');
@@ -92,16 +93,16 @@ function CardActions({
     onSettingsChange: (profile: Profile) => void,
 }) {
     const [openCalendar, setOpenCalendar] = useState(false);
-    const [openStats, setOpenStats] = useState(false);
+    const [openOverview, setOpenOverview] = useState(false);
     const [openSettings, setOpenSettings] = useState(false);
 
     return (
         <>
             <Stack direction={"row"} justifyContent={"space-between"}>
                 <IconButton onClick={() => setOpenCalendar(true)}>
-                    <Icon>event</Icon>
+                    <Icon>today</Icon>
                 </IconButton>
-                <IconButton onClick={() => setOpenStats(true)}>
+                <IconButton onClick={() => setOpenOverview(true)}>
                     <Icon>leaderboard</Icon>
                 </IconButton>
                 <IconButton onClick={() => setOpenSettings(true)}>
@@ -124,10 +125,11 @@ function CardActions({
                     <Button onClick={() => onViewDateChange(defaultViewDate)} variant="outlined">Today</Button>
                 </DialogActions>
             </Dialog>
-            {openStats &&
-                <DialogStats
+            {openOverview &&
+                <DialogOverview
                     viewDate={viewDate}
-                    onClose={() => setOpenStats(false)}
+                    onChange={e => onViewDateChange(e)}
+                    onClose={() => setOpenOverview(false)}
                 />
             }
             {openSettings &&

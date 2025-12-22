@@ -1,5 +1,5 @@
 import { useToast } from "@/app/_libs/contexts";
-import { Box, Dialog, DialogContent, DialogTitle, Icon, Stack, Typography } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Icon, IconButton, Stack, Typography } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { useProfile } from "../../_libs/contexts";
@@ -7,11 +7,13 @@ import { getMoods } from "../../_libs/data";
 import { Mood, moodValueOptions } from "../../_libs/models";
 import { today } from "./card-moods";
 
-export default function DialogStats({
+export default function DialogOverview({
     viewDate,
+    onChange,
     onClose,
 }: {
     viewDate: Dayjs,
+    onChange: (date: Dayjs) => void,
     onClose: () => void,
 }) {
     const profile = useProfile();
@@ -32,15 +34,23 @@ export default function DialogStats({
 
     return (
         <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-            <DialogTitle>Stats</DialogTitle>
+            <DialogTitle>Overview </DialogTitle>
             <DialogContent dividers>
                 <Stack spacing={2} alignItems={"center"}>
-                    <Typography variant="h5" color="primary">
-                        <b>{viewDate.year()}</b>
-                    </Typography>
-                    <Stack spacing={0.2}>
+                    <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ width: 1 }}>
+                        <IconButton onClick={() => onChange(viewDate.add(-1, 'year'))}>
+                            <Icon>navigate_before</Icon>
+                        </IconButton>
+                        <Typography variant="h5" color="primary">
+                            {viewDate.year()}
+                        </Typography>
+                        <IconButton onClick={() => onChange(viewDate.add(1, 'year'))}>
+                            <Icon>navigate_next</Icon>
+                        </IconButton>
+                    </Stack>
+                    <Stack spacing={0.3}>
                         {[...Array(12).keys()].map(m =>
-                            <Stack key={m} direction={"row"} spacing={0.2}>
+                            <Stack key={m} direction={"row"} spacing={0.3}>
                                 {[...Array(viewDate.month(m).daysInMonth()).keys()].map(d =>
                                     <Dot
                                         key={d}
@@ -62,5 +72,5 @@ function Dot({ date, moods }: { date: Dayjs, moods: Mood[] }) {
     const color = date.isAfter(today) ? 'primary.light' :
         (moodValueOptions.find(e => e.value === mood?.value)?.color || 'primary.light');
 
-    return (<Icon sx={{ fontSize: 8, color }}>circle</Icon>);
+    return (<Icon sx={{ fontSize: 10, color }}>circle</Icon>);
 }

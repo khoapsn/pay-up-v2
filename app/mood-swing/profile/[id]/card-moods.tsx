@@ -113,7 +113,7 @@ function DialogMoodPicker({
 
     return (
         <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-            <DialogTitle>Swing the mood</DialogTitle>
+            <DialogTitle>Swing le mood</DialogTitle>
             <DialogContent dividers>
                 <List>
                     {moodValueOptions.map(e =>
@@ -121,11 +121,13 @@ function DialogMoodPicker({
                             key={e.value}
                             onClick={() => handleClick(e.value)}
                             selected={e.value === value}
-                            sx={{ borderRadius: 10 }}
+                            sx={{ borderRadius: 10, px: 1.25 }}
                             disabled={loading}
                         >
                             <ListItemIcon>
-                                <Icon fontSize="large" sx={{ color: e.color }}>circle</Icon>
+                                <Icon fontSize="large" sx={{ color: e.color }}>
+                                    {e.value === value ? 'radio_button_checked' : 'circle'}
+                                </Icon>
                             </ListItemIcon>
                             <ListItemText sx={{ textTransform: 'capitalize' }}>{e.value}</ListItemText>
                         </ListItemButton>

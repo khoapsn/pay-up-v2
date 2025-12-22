@@ -2,6 +2,7 @@ export type Profile = {
     id: string,
     name: string,
     week_start_on_sunday: boolean,
+    last_opened?: string,
 }
 
 export type Mood = {
@@ -25,7 +26,7 @@ export type MoodValueOption = {
 }
 
 export const moodValueOptions: MoodValueOption[] = [
-    { value: MoodValue.Energetic, color: 'orange' },
+    { value: MoodValue.Energetic, color: '#ff9600' },
     { value: MoodValue.Joyful, color: '#ffcc00' },
     { value: MoodValue.Neutral, color: '#35c759' },
     { value: MoodValue.Sad, color: '#027aff' },
