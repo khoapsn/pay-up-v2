@@ -1,15 +1,17 @@
 export type Profile = {
     id: string,
     name: string,
+    week_start_on_sunday: boolean,
 }
 
 export type Mood = {
-    profileId: string,
+    profile_id: string,
     date: string,
     value: MoodValue,
 }
 
 export enum MoodValue {
+    Energetic = 'energetic',
     Joyful = 'joyful',
     Neutral = 'neutral',
     Sad = 'sad',
@@ -23,6 +25,7 @@ export type MoodValueOption = {
 }
 
 export const moodValueOptions: MoodValueOption[] = [
+    { value: MoodValue.Energetic, color: 'orange' },
     { value: MoodValue.Joyful, color: '#ffcc00' },
     { value: MoodValue.Neutral, color: '#35c759' },
     { value: MoodValue.Sad, color: '#027aff' },
@@ -31,5 +34,5 @@ export const moodValueOptions: MoodValueOption[] = [
 ]
 
 export type Settings = {
-    weekStartOnSunday: boolean,
+    test?: boolean,
 }

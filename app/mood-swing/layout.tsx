@@ -10,7 +10,7 @@ const theme = createTheme({
     palette: {
         primary: {
             ...themeColor,
-            "main": themeColor[900],
+            "main": themeColor[800],
             "light": themeColor[300],
         },
     },
@@ -18,7 +18,7 @@ const theme = createTheme({
         MuiIconButton: {
             defaultProps: {
                 sx: {
-                    color: themeColor[900],
+                    color: themeColor[800],
                 },
             },
         },
@@ -26,23 +26,19 @@ const theme = createTheme({
 });
 
 export default function Layout({ children }: { children: ReactNode }) {
-    const settingsState = useState<Settings>({
-        weekStartOnSunday: false,
-    });
+    const settingsState = useState<Settings>({});
     const [settings, setSettings] = settingsState;
     const ready = !!settings;
 
     useEffect(() => {
-        setSettings({
-            weekStartOnSunday: localStorage.getItem('weekStartOnSunday') === 'true',
-        });
+        setSettings({});
     }, []);
 
     return (
         <ThemeProvider theme={theme}>
             {ready &&
                 <SettingsStateContext value={settingsState}>
-                    <Box sx={{ bgcolor: themeColor[100], minHeight: '100vh' }}>
+                    <Box sx={{ bgcolor: themeColor[100], height: '100vh' }}>
                         <Header />
                         <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
                             {children}

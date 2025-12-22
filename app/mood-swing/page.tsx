@@ -17,7 +17,7 @@ export default function Page() {
         try {
             setLoading(true);
             const id = await postProfile(name);
-            router.push(`/mood-swing/profile/${id}`);
+            router.replace(`/mood-swing/profile/${id}`);
         } catch (e) {
             toast('Error', String(e), 'error');
         } finally {

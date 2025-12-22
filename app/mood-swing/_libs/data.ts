@@ -16,13 +16,21 @@ export const postProfile = async (name: string): Promise<string> => {
     return data[0].id;
 }
 
-export const getMoods = async (profileId: string, month: number, year: number): Promise<Mood[]> => {
+export const putProfile = async (profile: Profile) => {
+    await sql`
+        UPDATE mood_swing.profiles
+        SET name=${profile.name}, week_start_on_sunday=${profile.week_start_on_sunday}
+        WHERE id=${profile.id}
+    `;
+}
+
+export const getMoods = async (profileId: string, year: number, month?: number): Promise<Mood[]> => {
     const data = await sql`
         SELECT *
         FROM mood_swing.moods
         WHERE
             profile_id=${profileId}
-            AND date LIKE ${`${year}-${month}-%`}
+            AND date LIKE ${month ? `${year}-${month}-%` : `${year}-%`}
     ` as Mood[];
     return data;
 }
