@@ -48,9 +48,9 @@ export default function DialogOverview({
                             <Icon>navigate_next</Icon>
                         </IconButton>
                     </Stack>
-                    <Stack spacing={0.3}>
+                    <Stack spacing={0.2}>
                         {[...Array(12).keys()].map(m =>
-                            <Stack key={m} direction={"row"} spacing={0.3}>
+                            <Stack key={m} direction={"row"} spacing={0.2}>
                                 {[...Array(viewDate.month(m).daysInMonth()).keys()].map(d =>
                                     <Dot
                                         key={d}
@@ -72,5 +72,5 @@ function Dot({ date, moods }: { date: Dayjs, moods: Mood[] }) {
     const color = date.isAfter(today) ? 'primary.light' :
         (moodValueOptions.find(e => e.value === mood?.value)?.color || 'primary.light');
 
-    return (<Icon sx={{ fontSize: 10, color }}>circle</Icon>);
+    return (<Icon sx={{ fontSize: 8, color }}>circle</Icon>);
 }
