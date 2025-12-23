@@ -1,17 +1,31 @@
 'use client';
 
 import { Button, Stack, TextField } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useToast } from "../_libs/contexts";
 import { postProfile } from "./_libs/data";
-import { Profile } from "./_libs/models";
+import { retrieveProfiles } from "./_libs/utils";
 
 export default function Page() {
+    const params = useSearchParams();
     const router = useRouter();
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
+    const [show, setShow] = useState(false);
     const toast = useToast();
+
+    useEffect(() => {
+        if (params.get('create') !== '1') {
+            const id = retrieveProfiles()[0]?.id;
+            if (id) {
+                router.push(`/mood-swing/profile/${id}`);
+                return;
+            }
+        }
+
+        setShow(true);
+    }, []);
 
     const handleClick = async () => {
         try {
@@ -26,14 +40,18 @@ export default function Page() {
     };
 
     return (
-        <Stack spacing={2}>
-            <TextField
-                label="Your name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                fullWidth
-            />
-            <Button onClick={handleClick} loading={loading} variant="contained">Create profile</Button>
-        </Stack>
+        <>
+            {show &&
+                <Stack spacing={2}>
+                    <TextField
+                        label="Your name"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        fullWidth
+                    />
+                    <Button onClick={handleClick} loading={loading} variant="contained">Create profile</Button>
+                </Stack>
+            }
+        </>
     );
 }

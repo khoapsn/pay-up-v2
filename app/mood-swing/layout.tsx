@@ -68,7 +68,7 @@ function Header() {
                     <Typography variant="h6" component="div" fontWeight={700} sx={{ flexGrow: 1 }}>
                         mood swing
                     </Typography>
-                    {pathname !== '/mood-swing' && <IconButton onClick={() => router.push('/mood-swing')} sx={{ color: 'primary.contrastText' }}>
+                    {pathname !== '/mood-swing' && <IconButton onClick={() => router.push('/mood-swing?create=1')} sx={{ color: 'primary.contrastText' }}>
                         <Icon>add</Icon>
                     </IconButton>}
                     <IconButton onClick={() => setOpen(true)} sx={{ color: 'primary.contrastText' }}>
