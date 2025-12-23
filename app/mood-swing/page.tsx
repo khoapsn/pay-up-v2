@@ -2,12 +2,20 @@
 
 import { Button, Stack, TextField } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useToast } from "../_libs/contexts";
 import { postProfile } from "./_libs/data";
 import { retrieveProfiles } from "./_libs/utils";
 
 export default function Page() {
+    return (
+        <Suspense>
+            <Content />
+        </Suspense>
+    );
+}
+
+function Content() {
     const params = useSearchParams();
     const router = useRouter();
     const [name, setName] = useState('');
