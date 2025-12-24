@@ -1,11 +1,14 @@
 'use client';
 
-import { AppBar, Box, Container, createTheme, Dialog, DialogContent, DialogTitle, Icon, IconButton, List, ListItemButton, ListItemText, ThemeProvider, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, Container, createTheme, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItemButton, ListItemText, TextField, ThemeProvider, Toolbar, Typography } from "@mui/material";
 import { grey as themeColor } from "@mui/material/colors";
 import { ReactNode, useEffect, useState } from "react";
 import { SettingsStateContext } from "./_libs/contexts";
 import { Profile, Settings } from "./_libs/models";
 import { usePathname, useRouter } from "next/navigation";
+import { retrieveProfiles } from "./_libs/utils";
+import { postProfile } from "./_libs/data";
+import { useToast } from "../_libs/contexts";
 
 const theme = createTheme({
     palette: {
@@ -27,26 +30,14 @@ const theme = createTheme({
 });
 
 export default function Layout({ children }: { children: ReactNode }) {
-    const settingsState = useState<Settings>({});
-    const [settings, setSettings] = settingsState;
-    const ready = !!settings;
-
-    useEffect(() => {
-        setSettings({});
-    }, []);
-
     return (
         <ThemeProvider theme={theme}>
-            {ready &&
-                <SettingsStateContext value={settingsState}>
-                    <Box sx={{ bgcolor: themeColor[100] }}>
-                        <Header />
-                        <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
-                            {children}
-                        </Container>
-                    </Box>
-                </SettingsStateContext>
-            }
+            <Box sx={{ bgcolor: themeColor[100] }}>
+                <Header />
+                <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
+                    {children}
+                </Container>
+            </Box>
         </ThemeProvider>
     );
 }
@@ -55,10 +46,22 @@ function Header() {
     const router = useRouter();
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
+    const [openNew, setOpenNew] = useState(false);
     const [profiles, setProfiles] = useState<Profile[]>([]);
 
     useEffect(() => {
-        if (open) setProfiles(JSON.parse(localStorage.getItem('profiles') ?? '[]'));
+        if (pathname === '/mood-swing') {
+            const ps = retrieveProfiles();
+
+            if (ps.length)
+                router.push(`/mood-swing/profile/${ps[0].id}`);
+            else
+                setOpenNew(true);
+        }
+    }, [pathname]);
+
+    useEffect(() => {
+        if (open) setProfiles(retrieveProfiles());
     }, [open]);
 
     return (
@@ -68,9 +71,9 @@ function Header() {
                     <Typography variant="h6" component="div" fontWeight={700} sx={{ flexGrow: 1 }}>
                         mood swing
                     </Typography>
-                    {pathname !== '/mood-swing' && <IconButton onClick={() => router.push('/mood-swing?create=1')} sx={{ color: 'primary.contrastText' }}>
+                    <IconButton onClick={() => setOpenNew(true)} sx={{ color: 'primary.contrastText' }}>
                         <Icon>add</Icon>
-                    </IconButton>}
+                    </IconButton>
                     <IconButton onClick={() => setOpen(true)} sx={{ color: 'primary.contrastText' }}>
                         <Icon>folder</Icon>
                     </IconButton>
@@ -96,6 +99,59 @@ function Header() {
                     </List>
                 </DialogContent>
             </Dialog>
+            {openNew &&
+                <DialogNew onClose={() => setOpenNew(false)} />
+            }
         </>
     );
+}
+
+function DialogNew({ onClose }: { onClose: () => void }) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const [name, setName] = useState('');
+    const [loading, setLoading] = useState(false);
+    const toast = useToast();
+
+    const handleClick = async () => {
+        try {
+            setLoading(true);
+            const id = await postProfile(name);
+            router.push(`/mood-swing/profile/${id}`);
+            onClose();
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleClose = () => {
+        if (pathname === '/mood-swing') return;
+        onClose();
+    };
+
+    return (
+        <Dialog open onClose={handleClose} fullWidth maxWidth="xs">
+            <DialogTitle>Create a profile</DialogTitle>
+            <DialogContent dividers>
+                <TextField
+                    label="Your name"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    fullWidth
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button
+                    onClick={handleClick}
+                    loading={loading}
+                    disabled={!name.trim()}
+                    variant="contained"
+                >
+                    Create
+                </Button>
+            </DialogActions>
+        </Dialog>
+    )
 }
