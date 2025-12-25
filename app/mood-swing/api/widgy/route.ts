@@ -5,10 +5,10 @@ import dayjs from "dayjs";
 import { moodValueOptions } from "../../_libs/models";
 
 const today = dayjs();
-const radius = 8;
-const padding = 4;
+const radius = 20;
+const padding = 15;
 const defaultId = 'e2d9a073-be95-46a1-97cd-d750aa12d436';
-const bgColor = '#e0e0e0';
+const bgColor = '#2c2e2e';
 
 export async function GET(request: NextRequest) {
     const params = (new URL(request.url)).searchParams;

@@ -96,6 +96,11 @@ function CardActions({
     const [openOverview, setOpenOverview] = useState(false);
     const [openSettings, setOpenSettings] = useState(false);
 
+    const handleCalendarChange = (value?: Dayjs | null) => {
+        onViewDateChange(value ?? defaultViewDate);
+        setOpenCalendar(false);
+    };
+
     return (
         <>
             <Stack direction={"row"} justifyContent={"space-between"}>
@@ -115,14 +120,11 @@ function CardActions({
                     openTo="month"
                     views={['year', 'month']}
                     onChange={(value, state) => {
-                        if (state === 'finish') {
-                            onViewDateChange(value ?? defaultViewDate);
-                            setOpenCalendar(false);
-                        }
+                        if (state === 'finish') handleCalendarChange(value);
                     }}
                 />
                 <DialogActions>
-                    <Button onClick={() => onViewDateChange(defaultViewDate)} variant="outlined">Today</Button>
+                    <Button onClick={() => handleCalendarChange()} variant="outlined">Today</Button>
                 </DialogActions>
             </Dialog>
             {openOverview &&
