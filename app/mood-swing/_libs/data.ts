@@ -30,7 +30,7 @@ export const getMoods = async (profileId: string, year: number, month?: number):
         FROM mood_swing.moods
         WHERE
             profile_id=${profileId}
-            AND date LIKE ${month ? `${year}-${month}-%` : `${year}-%`}
+            AND date LIKE ${month ? `${year}-${month.toString().padStart(2, '0')}-%` : `${year}-%`}
     ` as Mood[];
     return data;
 }
