@@ -9,10 +9,10 @@ import { useEffect, useState } from "react";
 import { ProfileContext } from "../../_libs/contexts";
 import { getProfile } from "../../_libs/data";
 import { Profile } from "../../_libs/models";
+import { storeProfile } from "../../_libs/utils";
 import CardMoods from "./card-moods";
 import DialogOverview from "./dialog-overview";
 import DialogSettings from "./dialog-settings";
-import { storeProfile } from "../../_libs/utils";
 
 const defaultViewDate = dayjs().startOf('month');
 
