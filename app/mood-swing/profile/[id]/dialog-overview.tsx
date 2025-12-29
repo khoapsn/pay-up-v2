@@ -1,5 +1,5 @@
 import { useToast } from "@/app/_libs/contexts";
-import { Dialog, DialogContent, DialogTitle, Icon, IconButton, Stack, Typography } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, Stack, Typography } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { useProfile } from "../../_libs/contexts";
@@ -63,6 +63,9 @@ export default function DialogOverview({
                     </Stack>
                 </Stack>
             </DialogContent>
+            <DialogActions>
+                <IconButton href={`/mood-swing/api/widgy?id=${profile.id}&year=${viewDate.year()}`} target="_blank"><Icon>image</Icon></IconButton>
+            </DialogActions>
         </Dialog>
     );
 }

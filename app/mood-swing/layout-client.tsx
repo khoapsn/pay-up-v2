@@ -44,9 +44,8 @@ export default function LayoutClient({ children }: { children: ReactNode }) {
 function Header() {
     const router = useRouter();
     const pathname = usePathname();
-    const [open, setOpen] = useState(false);
     const [openNew, setOpenNew] = useState(false);
-    const [profiles, setProfiles] = useState<Profile[]>([]);
+    const [profiles, setProfiles] = useState<Profile[]>();
 
     useEffect(() => {
         if (pathname === '/mood-swing') {
@@ -59,10 +58,6 @@ function Header() {
         }
     }, [pathname]);
 
-    useEffect(() => {
-        if (open) setProfiles(retrieveProfiles());
-    }, [open]);
-
     return (
         <>
             <AppBar position="fixed" sx={{ zIndex: 1 }}>
@@ -73,31 +68,33 @@ function Header() {
                     <IconButton onClick={() => setOpenNew(true)} sx={{ color: 'primary.contrastText' }}>
                         <Icon>add</Icon>
                     </IconButton>
-                    <IconButton onClick={() => setOpen(true)} sx={{ color: 'primary.contrastText' }}>
+                    <IconButton onClick={() => setProfiles(retrieveProfiles())} sx={{ color: 'primary.contrastText' }}>
                         <Icon>folder</Icon>
                     </IconButton>
                 </Toolbar>
             </AppBar>
             <Toolbar />
-            <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="xs">
-                <DialogTitle>Who are you, really?</DialogTitle>
-                <DialogContent dividers>
-                    <List>
-                        {profiles.map(e =>
-                            <ListItemButton
-                                key={e.id}
-                                onClick={() => {
-                                    router.push(`/mood-swing/profile/${e.id}`);
-                                    setOpen(false);
-                                }}
-                                divider
-                            >
-                                <ListItemText>{e.name}</ListItemText>
-                            </ListItemButton>
-                        )}
-                    </List>
-                </DialogContent>
-            </Dialog>
+            {profiles &&
+                <Dialog open onClose={() => setProfiles(undefined)} fullWidth maxWidth="xs">
+                    <DialogTitle>Open profile</DialogTitle>
+                    <DialogContent dividers>
+                        <List>
+                            {profiles.map(e =>
+                                <ListItemButton
+                                    key={e.id}
+                                    onClick={() => {
+                                        router.push(`/mood-swing/profile/${e.id}`);
+                                        setProfiles(undefined);
+                                    }}
+                                    divider
+                                >
+                                    <ListItemText>{e.name}</ListItemText>
+                                </ListItemButton>
+                            )}
+                        </List>
+                    </DialogContent>
+                </Dialog>
+            }
             {openNew &&
                 <DialogNew onClose={() => setOpenNew(false)} />
             }
