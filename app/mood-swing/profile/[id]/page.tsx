@@ -28,7 +28,7 @@ export default function Page() {
                 const data = await getProfile(id);
                 setProfile(data);
                 storeProfile(data);
-                toast(`Welcome back, ${data.name}`, 'How are we feeling today?')
+                toast(`Welcome back, ${data.name}`, 'How are we feeling today?');
             } catch (e) {
                 toast('Error', String(e), 'error');
             }

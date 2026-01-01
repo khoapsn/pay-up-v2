@@ -1,7 +1,5 @@
 'use client';
 
-import "./styles.css";
-
 import { AppBar, Button, Container, createTheme, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItemButton, ListItemText, TextField, ThemeProvider, Toolbar, Typography } from "@mui/material";
 import { grey as themeColor } from "@mui/material/colors";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,6 +8,7 @@ import { useToast } from "../_libs/contexts";
 import { postProfile } from "./_libs/data";
 import { Profile } from "./_libs/models";
 import { retrieveProfiles } from "./_libs/utils";
+import "./styles.css";
 
 const theme = createTheme({
     palette: {
@@ -129,7 +128,7 @@ function DialogNew({ onClose }: { onClose: () => void }) {
 
     return (
         <Dialog open onClose={handleClose} fullWidth maxWidth="xs">
-            <DialogTitle>Create a profile</DialogTitle>
+            <DialogTitle>New profile</DialogTitle>
             <DialogContent dividers>
                 <TextField
                     label="Your name"
