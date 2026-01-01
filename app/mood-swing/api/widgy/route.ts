@@ -8,12 +8,13 @@ const today = dayjs();
 const radius = 20;
 const padding = 15;
 const defaultId = 'e2d9a073-be95-46a1-97cd-d750aa12d436';
-const bgColor = '#8e8e93';
+const defaultColor = '8e8e93';
 
 export async function GET(request: NextRequest) {
     const params = (new URL(request.url)).searchParams;
     const id = params.get('id') || defaultId;
     const year = Number(params.get('year')) || today.year();
+    const color = '#' + (params.get('color') || defaultColor);
     const moods = await getMoods(id, year);
 
     const canvas = createCanvas(31 * 2 * radius + 30 * padding, 12 * 2 * radius + 11 * padding);
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = bgColor;
+            ctx.fillStyle = color;
             ctx.fill();
         });
     });
