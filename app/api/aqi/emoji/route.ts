@@ -5,6 +5,7 @@ import { url } from "../route";
 export async function GET() {
     const data = await fetch(url);
     const json = await data.json();
+    console.log(json);
     const value = Number(json.data.current.pollution.aqius);
 
     let icon = '';
@@ -17,7 +18,7 @@ export async function GET() {
 
     const buffer = await fs.readFile(`${process.cwd()}/public/icons/${icon}.png`);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
         headers: {
             'Content-Type': 'image/png',
         },
