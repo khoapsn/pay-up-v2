@@ -11,16 +11,15 @@ export async function GET() {
     if (value <= 50) icon = 'excited';
     else if (value <= 100) icon = 'calm';
     else if (value <= 150) icon = 'neutral';
-    else if (value <= 200) icon = 'stressed';
-    else if (value <= 300) icon = 'sick';
+    else if (value <= 200) icon = 'sad';
+    else if (value <= 300) icon = 'stressed';
     else icon = 'dead';
 
-    const buffer = await fs.readFile(`${process.cwd()}/public/icons/${icon}.svg`);
+    const buffer = await fs.readFile(`${process.cwd()}/public/icons/${icon}.png`);
 
     return new NextResponse(buffer, {
         headers: {
-            'Content-Type': 'image/svg',
-            'Content-Disposition': 'attachment; filename="emoji.svg"',
+            'Content-Type': 'image/png',
         },
     });
 }
