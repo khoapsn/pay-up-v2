@@ -9,12 +9,12 @@ export async function GET() {
     const value = Number(json.data.current.pollution.aqius);
 
     let icon = '';
-    if (value <= 50) icon = 'excited';
-    else if (value <= 100) icon = 'calm';
-    else if (value <= 150) icon = 'neutral';
-    else if (value <= 200) icon = 'sad';
-    else if (value <= 300) icon = 'stressed';
-    else icon = 'dead';
+    if (value <= 50) icon = 'face-0';
+    else if (value <= 100) icon = 'face-1';
+    else if (value <= 150) icon = 'face-2';
+    else if (value <= 200) icon = 'face-3';
+    else if (value <= 300) icon = 'face-4';
+    else icon = 'face-5';
 
     const buffer = await fs.readFile(`${process.cwd()}/public/icons/${icon}.png`);
 
