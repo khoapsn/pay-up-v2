@@ -1,25 +1,13 @@
-export type ProjectSummary = {
-    id: string,
-    title: string,
-    lastOpened: string,
-}
-
 export type Project = {
     id: string,
     title: string,
     description?: string,
     date: Date,
-    currencies: {
-        base: string,
-        others: Currency[],
-    },
-    members: Member[]
-    // createdTime: string,
+    currency: string,
 }
 
 export type Currency = {
-    name: string,
-    rate: number,
+    currency: string,
 }
 
 export type Expense = {
@@ -27,8 +15,8 @@ export type Expense = {
     title: string,
     amount: number,
     currency: string,
-    paidBy: Member,
-    paidFor: PaidFor[],
+    paid_by: Member,
+    paid_for: PaidFor[],
     time: string,
     // createdTime: string,
 }
@@ -41,4 +29,11 @@ export type PaidFor = {
 export type Member = {
     id: number,
     name: string,
+    active: boolean,
+}
+
+export type Exchange = {
+    project_id: string,
+    currency: string,
+    rate: number,
 }

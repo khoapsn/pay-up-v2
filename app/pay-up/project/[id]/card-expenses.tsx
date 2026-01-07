@@ -1,22 +1,21 @@
-import { Button, Card, CardContent, CardHeader, Icon } from "@mui/material";
-import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
-import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
-import { useProject } from "../../_libs/contexts";
+import { useToast } from "@/app/_libs/contexts";
+import { Avatar, Card, CardContent, CardHeader, Icon, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, ListSubheader, Stack, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useExchanges, useProject } from "../../_libs/contexts";
 import { getExpenses } from "../../_libs/data";
-import { Expense, Member, PaidFor } from "../../_libs/models";
-
-const sortModel: GridSortModel = [{ field: 'time', sort: 'desc' }];
+import { Expense } from "../../_libs/models";
+import { convertAmount } from "../../_libs/utils";
 
 export default function CardExpenses() {
     const project = useProject();
-    const [rows, setRows] = useState<Expense[]>();
+    const [expenses, setExpenses] = useState<Expense[]>();
+    const toast = useToast();
 
     const refresh = async () => {
         try {
-            setRows(await getExpenses(project.id));
+            setExpenses(await getExpenses(project.id));
         } catch (e) {
-
+            toast('Error', String(e), 'error');
         }
     };
 
@@ -24,79 +23,76 @@ export default function CardExpenses() {
         refresh();
     }, []);
 
-    const columns = useMemo((): GridColDef[] => [
-        // {
-        //     field: 'Actions',
-        //     type: 'actions',
-        //     getActions: () => [
-        //         <GridActionsCellItem key="edit" label="Edit" icon={<Icon>edit</Icon>} />
-        //     ],
-        //     hideable: false,
-        //     maxWidth: 50,
-        // },
-        {
-            field: 'id',
-            headerName: 'ID',
-            type: 'number',
-            filterable: false,
-        },
-        {
-            field: 'time',
-            headerName: 'Time',
-            type: 'date',
-            valueGetter: e => new Date(e),
-            valueFormatter: e => dayjs(e).format('MM/DD/YYYY HH:mm'),
-            minWidth: 140,
-        },
-        {
-            field: 'title',
-            headerName: 'Title',
-            minWidth: 200,
-        },
-        {
-            field: 'paidBy',
-            headerName: 'Paid By',
-            type: 'singleSelect',
-            valueGetter: (e: Member) => e.name,
-            valueOptions: project.members.map(e => e.name),
-        },
-        {
-            field: 'paidFor',
-            headerName: 'Paid For',
-            valueGetter: (e: PaidFor[]) => e.map(f => f.member.name).join(', '),
-            minWidth: 200,
-        },
-        {
-            field: 'amount',
-            headerName: 'Amount',
-            type: 'number',
-        },
-        {
-            field: 'currency',
-            headerName: 'Currency',
-        },
-    ], [project]);
+    return (
+        <>
+            {expenses &&
+                <Stack spacing={2}>
+                    <CardSummary expenses={expenses} />
+                    <Card>
+                        <CardHeader
+                            title="Expenses"
+                            slotProps={{ title: { color: 'primary' } }}
+                            action={<IconButton color="primary"><Icon>add</Icon></IconButton>}
+                        />
+                        <List dense>
+                            <ListSubheader component={"div"} color="primary">Today</ListSubheader>
+                            {expenses.map(e =>
+                                <ListItemButton key={e.id}>
+                                    {/* <ListItemAvatar>
+                                        <Avatar sx={{ bgcolor: 'primary.light' }}><Icon>receipt</Icon></Avatar>
+                                    </ListItemAvatar> */}
+                                    <ListItemText
+                                        slotProps={{ primary: { color: 'secondary' } }}
+                                        secondary={`${e.paid_by.name} → ${e.paid_for.map(f => f.member.name).join(', ')}`}
+                                    >
+                                        {e.title}
+                                    </ListItemText>
+                                    <ListItemText
+                                        secondary={e.currency}
+                                        sx={{ textAlign: 'end' }}
+                                    >
+                                        <b>{e.amount.toLocaleString('en')}</b>
+                                    </ListItemText>
+                                </ListItemButton>
+                            )}
+                            {expenses.map(e =>
+                                <ListItemButton key={e.id}>
+                                    <ListItemText
+                                        secondary={`${e.paid_by.name} → ${e.paid_for.map(f => f.member.name).join(', ')}`}
+                                    >
+                                        {e.title}
+                                    </ListItemText>
+                                    <ListItemText
+                                        secondary={e.currency}
+                                        sx={{ textAlign: 'end' }}
+                                    >
+                                        <b>{e.amount.toLocaleString('en')}</b>
+                                    </ListItemText>
+                                </ListItemButton>
+                            )}
+                        </List>
+                    </Card>
+                </Stack >
+            }
+        </>
+    );
+}
+
+function CardSummary({ expenses }: { expenses: Expense[] }) {
+    const project = useProject();
+    const exchanges = useExchanges();
+    const total = expenses.reduce((p, c) => p + convertAmount(c.amount, c.currency, project.currency, exchanges), 0);
 
     return (
         <Card>
             <CardHeader
-                action={<Button variant="contained" startIcon={<Icon>add</Icon>}>Add expense</Button>}
+                title="Summary"
+                slotProps={{ title: { color: 'primary' } }}
+                action={<IconButton><Icon>leaderboard</Icon></IconButton>}
             />
             <CardContent>
-                <DataGrid
-                    rows={rows}
-                    columns={columns}
-                    loading={!rows}
-                    initialState={{
-                        sorting: { sortModel },
-                        columns: { columnVisibilityModel: { id: false } },
-                        density: 'compact',
-                    }}
-                    onRowClick={() => console.log('row clicked')}
-                    showToolbar
-                    autosizeOnMount
-                    autoHeight
-                />
+                <Typography>Total expenses</Typography>
+                <Typography variant="h5">{total.toLocaleString('en')} {project.currency}</Typography>
             </CardContent>
         </Card>
     );

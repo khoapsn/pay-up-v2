@@ -1,56 +1,141 @@
 'use client';
 
 import { useToast } from "@/app/_libs/contexts";
-import { Card, CardContent, CardHeader, Icon, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
+import { Card, CardContent, CardHeader, Icon, IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ProjectContext } from "../../_libs/contexts";
-import { getProject } from "../../_libs/data";
-import { Project } from "../../_libs/models";
+import { CurrenciesContext, ExchangesContext, MembersContext, ProjectContext, useProject } from "../../_libs/contexts";
+import { getCurrencies, getExchanges, getMembers, getProject } from "../../_libs/data";
+import { Currency, Exchange, Member, Project } from "../../_libs/models";
+import { storeProject } from "../../_libs/utils";
 import CardExpenses from "./card-expenses";
+import DialogCurrencies from "./dialog-currencies";
+import DialogMembers from "./dialog-members";
 import DialogProject from "./dialog-project";
 
 export default function Page() {
     const { id } = useParams<{ id: string }>();
     const [project, setProject] = useState<Project>();
-    const [open, setOpen] = useState(false);
+    const [members, setMembers] = useState<Member[]>();
+    const [exchanges, setExchanges] = useState<Exchange[]>();
+    const [curr, setCurr] = useState<Currency[]>([]);
     const toast = useToast();
 
     const refresh = async () => {
         try {
-            setProject(await getProject(id));
+            const data = await getProject(id);
+            setProject(data);
+            storeProject(data);
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        }
+    };
+
+    const refreshMembers = async () => {
+        try {
+            setMembers(await getMembers(id));
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        }
+    };
+
+    const refreshExchanges = async () => {
+        try {
+            setExchanges(await getExchanges(id));
         } catch (e) {
             toast('Error', String(e), 'error');
         }
     };
 
     useEffect(() => {
+        const init = async () => {
+            try {
+                setCurr(await getCurrencies());
+            } catch (e) {
+                toast('Error', String(e), 'error');
+            }
+        };
+
+        init();
         refresh();
+        refreshMembers();
+        refreshExchanges();
     }, []);
 
     return (
-        <>
-            {project ?
+        <CurrenciesContext.Provider value={curr}>
+            {project && members && exchanges &&
                 <ProjectContext.Provider value={project}>
-                    <Stack spacing={2}>
-                        <Card>
-                            <CardHeader
-                                title={project.title}
-                                slotProps={{ title: { color: 'primary' } }}
-                                subheader={dayjs(project.date).format('MM/DD/YYYY')}
-                                action={<IconButton onClick={() => setOpen(true)}><Icon>settings</Icon></IconButton>}
-                            />
-                            <CardContent>
-                                <Typography whiteSpace="pre-line">{project.description}</Typography>
-                            </CardContent>
-                        </Card>
-                        <CardExpenses />
-                    </Stack>
-                    {open && <DialogProject onSave={refresh} onClose={() => setOpen(false)} />}
+                    <MembersContext.Provider value={members}>
+                        <ExchangesContext.Provider value={exchanges}>
+                            <Stack spacing={2}>
+                                <CardProject
+                                    onChangeProject={refresh}
+                                    onChangeMembers={refreshMembers}
+                                    onChangeExchanges={refreshExchanges}
+                                />
+                                <CardExpenses />
+                            </Stack>
+                        </ExchangesContext.Provider>
+                    </MembersContext.Provider>
                 </ProjectContext.Provider>
-                :
-                <LinearProgress />
+            }
+        </CurrenciesContext.Provider>
+    );
+}
+
+function CardProject({
+    onChangeProject,
+    onChangeMembers,
+    onChangeExchanges,
+}: {
+    onChangeProject: () => Promise<void>,
+    onChangeMembers: () => Promise<void>,
+    onChangeExchanges: () => Promise<void>,
+}) {
+    const project = useProject();
+    const [open, setOpen] = useState(false);
+    const [openMembers, setOpenMembers] = useState(false);
+    const [openCurrs, setOpenCurrs] = useState(false);
+
+    return (
+        <>
+            <Card>
+                <CardHeader
+                    title={project.title}
+                    subheader={dayjs(project.date).format('MM/DD/YYYY')}
+                    slotProps={{ title: { color: 'primary' } }}
+                    action={
+                        <Stack direction={"row"}>
+                            <IconButton onClick={() => setOpenCurrs(true)}><Icon>paid</Icon></IconButton>
+                            <IconButton onClick={() => setOpenMembers(true)}><Icon>people_alt</Icon></IconButton>
+                            <IconButton onClick={() => setOpen(true)}><Icon>settings</Icon></IconButton>
+                        </Stack>
+                    }
+                />
+                <CardContent>
+                    <Typography whiteSpace="pre-line">{project.description}</Typography>
+                </CardContent>
+            </Card>
+            {open &&
+                <DialogProject
+                    onSave={onChangeProject}
+                    onClose={() => setOpen(false)}
+                />
+            }
+            {openMembers &&
+                <DialogMembers
+                    onChange={onChangeMembers}
+                    onClose={() => setOpenMembers(false)}
+                />
+            }
+            {openCurrs &&
+                <DialogCurrencies
+                    onChange={onChangeProject}
+                    onChangeExchanges={onChangeExchanges}
+                    onClose={() => setOpenCurrs(false)}
+                />
             }
         </>
     );

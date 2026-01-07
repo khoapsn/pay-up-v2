@@ -1,39 +1,20 @@
 'use client';
 
 import { AppBar, Button, Container, createTheme, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItemButton, ListItemText, TextField, ThemeProvider, Toolbar, Typography } from "@mui/material";
-import { grey as themeColor } from "@mui/material/colors";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { useToast } from "../_libs/contexts";
-import { postProfile } from "./_libs/data";
-import { Profile } from "./_libs/models";
-import { retrieveProfiles } from "./_libs/utils";
-import "./styles.css";
+import { postProject } from "./_libs/data";
+import { Project } from "./_libs/models";
+import { retrieveProjects } from "./_libs/utils";
 
-const theme = createTheme({
-    palette: {
-        primary: {
-            ...themeColor,
-            "main": themeColor[800],
-            "light": themeColor[300],
-        },
-    },
-    components: {
-        MuiIconButton: {
-            defaultProps: {
-                sx: {
-                    color: themeColor[800],
-                },
-            },
-        },
-    },
-});
+const theme = createTheme({});
 
 export default function LayoutClient({ children }: { children: ReactNode }) {
     return (
         <ThemeProvider theme={theme}>
             <Header />
-            <Container maxWidth="xs" sx={{ py: 10, px: 5 }}>
+            <Container maxWidth="md" sx={{ p: 2 }}>
                 {children}
             </Container>
         </ThemeProvider>
@@ -44,14 +25,14 @@ function Header() {
     const router = useRouter();
     const pathname = usePathname();
     const [openNew, setOpenNew] = useState(false);
-    const [profiles, setProfiles] = useState<Profile[]>();
+    const [projects, setProjects] = useState<Project[]>();
 
     useEffect(() => {
-        if (pathname === '/mood-swing') {
-            const ps = retrieveProfiles();
+        if (pathname === '/pay-up') {
+            const ps = retrieveProjects();
 
             if (ps.length)
-                router.push(`/mood-swing/profile/${ps[0].id}`);
+                router.push(`/pay-up/project/${ps[0].id}`);
             else
                 setOpenNew(true);
         }
@@ -59,35 +40,35 @@ function Header() {
 
     return (
         <>
-            <AppBar position="fixed" sx={{ zIndex: 1 }}>
+            <AppBar position="fixed" sx={{ zIndex: 2 }}>
                 <Toolbar>
                     <Typography variant="h6" component="div" fontWeight={700} sx={{ flexGrow: 1 }}>
-                        mood swing
+                        pay up!
                     </Typography>
                     <IconButton onClick={() => setOpenNew(true)} sx={{ color: 'primary.contrastText' }}>
                         <Icon>add</Icon>
                     </IconButton>
-                    <IconButton onClick={() => setProfiles(retrieveProfiles())} sx={{ color: 'primary.contrastText' }}>
+                    <IconButton onClick={() => setProjects(retrieveProjects())} sx={{ color: 'primary.contrastText' }}>
                         <Icon>folder</Icon>
                     </IconButton>
                 </Toolbar>
             </AppBar>
             <Toolbar />
-            {profiles &&
-                <Dialog open onClose={() => setProfiles(undefined)} fullWidth maxWidth="xs">
-                    <DialogTitle>Open profile</DialogTitle>
+            {projects &&
+                <Dialog open onClose={() => setProjects(undefined)} fullWidth maxWidth="xs">
+                    <DialogTitle>Open project</DialogTitle>
                     <DialogContent dividers>
                         <List>
-                            {profiles.map((e, i) =>
+                            {projects.map((e, i) =>
                                 <ListItemButton
                                     key={e.id}
                                     onClick={() => {
-                                        router.push(`/mood-swing/profile/${e.id}`);
-                                        setProfiles(undefined);
+                                        router.push(`/pay-up/project/${e.id}`);
+                                        setProjects(undefined);
                                     }}
-                                    divider={i !== profiles.length - 1}
+                                    divider={i !== projects.length - 1}
                                 >
-                                    <ListItemText>{e.name}</ListItemText>
+                                    <ListItemText>{e.title}</ListItemText>
                                 </ListItemButton>
                             )}
                         </List>
@@ -104,15 +85,15 @@ function Header() {
 function DialogNew({ onClose }: { onClose: () => void }) {
     const router = useRouter();
     const pathname = usePathname();
-    const [name, setName] = useState('');
+    const [title, setTitle] = useState('');
     const [loading, setLoading] = useState(false);
     const toast = useToast();
 
     const handleClick = async () => {
         try {
             setLoading(true);
-            const id = await postProfile(name);
-            router.push(`/mood-swing/profile/${id}`);
+            const id = await postProject(title);
+            router.push(`/pay-up/project/${id}`);
             onClose();
         } catch (e) {
             toast('Error', String(e), 'error');
@@ -122,18 +103,18 @@ function DialogNew({ onClose }: { onClose: () => void }) {
     };
 
     const handleClose = () => {
-        if (pathname === '/mood-swing') return;
+        if (pathname === '/pay-up') return;
         onClose();
     };
 
     return (
         <Dialog open onClose={handleClose} fullWidth maxWidth="xs">
-            <DialogTitle>New profile</DialogTitle>
+            <DialogTitle>New project</DialogTitle>
             <DialogContent dividers>
                 <TextField
-                    label="Your name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
+                    label="Title"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
                     fullWidth
                 />
             </DialogContent>
@@ -141,12 +122,12 @@ function DialogNew({ onClose }: { onClose: () => void }) {
                 <Button
                     onClick={handleClick}
                     loading={loading}
-                    disabled={!name.trim()}
+                    disabled={!title.trim()}
                     variant="contained"
                 >
                     Create
                 </Button>
             </DialogActions>
         </Dialog>
-    )
+    );
 }
