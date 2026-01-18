@@ -5,7 +5,6 @@ import { url } from "../route";
 export async function GET() {
     const data = await fetch(url);
     const json = await data.json();
-    console.log(json);
     const value = Number(json.data.current.pollution.aqius);
 
     let icon = '';

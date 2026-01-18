@@ -1,3 +1,4 @@
+
 export type Project = {
     id: string,
     title: string,
@@ -11,25 +12,39 @@ export type Currency = {
 }
 
 export type Expense = {
-    id: number,
+    id: string,
+    project_id: string,
     title: string,
+    description?: string,
     amount: number,
     currency: string,
-    paid_by: Member,
-    paid_for: PaidFor[],
-    time: string,
-    // createdTime: string,
+    paid_by: string,
+    paid_fors: PaidFor[],
+    time: Date,
+    is_tranfer: boolean,
 }
 
+export const newExpense = (project: Project): Expense => ({
+    id: '',
+    project_id: project.id,
+    title: '',
+    amount: 0,
+    currency: project.currency,
+    paid_by: '',
+    paid_fors: [],
+    time: new Date(),
+    is_tranfer: false,
+})
+
 export type PaidFor = {
-    member: Member,
+    member_id: string,
     weight: number,
 }
 
 export type Member = {
-    id: number,
+    id: string,
     name: string,
-    active: boolean,
+    is_active: boolean,
 }
 
 export type Exchange = {

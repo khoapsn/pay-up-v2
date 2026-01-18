@@ -17,7 +17,7 @@ import DialogProject from "./dialog-project";
 export default function Page() {
     const { id } = useParams<{ id: string }>();
     const [project, setProject] = useState<Project>();
-    const [members, setMembers] = useState<Member[]>();
+    const [members, setMembers] = useState<Map<string, Member>>();
     const [exchanges, setExchanges] = useState<Exchange[]>();
     const [curr, setCurr] = useState<Currency[]>([]);
     const toast = useToast();
@@ -75,7 +75,9 @@ export default function Page() {
                                     onChangeMembers={refreshMembers}
                                     onChangeExchanges={refreshExchanges}
                                 />
-                                <CardExpenses />
+                                <CardExpenses
+                                    onChangeMembers={refreshMembers}
+                                />
                             </Stack>
                         </ExchangesContext.Provider>
                     </MembersContext.Provider>
@@ -104,7 +106,7 @@ function CardProject({
             <Card>
                 <CardHeader
                     title={project.title}
-                    subheader={dayjs(project.date).format('MM/DD/YYYY')}
+                    subheader={dayjs(project.date).format('DD/MM/YYYY')}
                     slotProps={{ title: { color: 'primary' } }}
                     action={
                         <Stack direction={"row"}>

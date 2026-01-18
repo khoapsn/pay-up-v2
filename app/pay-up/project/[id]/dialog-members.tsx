@@ -1,8 +1,9 @@
 import { useToast } from "@/app/_libs/contexts";
-import { Avatar, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, TextField } from "@mui/material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItem, ListItemAvatar, ListItemText, Menu, MenuItem, TextField } from "@mui/material";
 import { useState } from "react";
 import { useMembers, useProject } from "../../_libs/contexts";
-import { postMember } from "../../_libs/data";
+import { deleteMember, patchMemberIsActive, patchMemberName, postMember } from "../../_libs/data";
+import { Member } from "../../_libs/models";
 
 export default function DialogMembers({
     onChange,
@@ -14,6 +15,9 @@ export default function DialogMembers({
     const project = useProject();
     const members = useMembers();
     const [name, setName] = useState('');
+    const [member, setMember] = useState<Member>();
+    const [anchor, setAnchor] = useState<HTMLElement>();
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const toast = useToast();
 
@@ -28,6 +32,37 @@ export default function DialogMembers({
             toast('Error', String(e), 'error');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRename = () => {
+        setOpen(true);
+        setAnchor(undefined);
+    };
+
+    const handleHide = async () => {
+        try {
+            if (!member) return;
+            await patchMemberIsActive(member.id, !member.is_active);
+            await onChange();
+            toast('Success', 'Member updated.');
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        } finally {
+            setAnchor(undefined);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            if (!member) return;
+            await deleteMember(member.id);
+            await onChange();
+            toast('Success', 'Member deleted.');
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        } finally {
+            setAnchor(undefined);
         }
     };
 
@@ -56,13 +91,23 @@ export default function DialogMembers({
                         fullWidth
                     />
                     <List>
-                        {members.map(e =>
+                        {Array.from(members.values()).map(e =>
                             <ListItem
                                 key={e.id}
-                                secondaryAction={<IconButton edge="end"><Icon>more_vert</Icon></IconButton>}
+                                secondaryAction={
+                                    <IconButton
+                                        onClick={f => {
+                                            setMember(e);
+                                            setAnchor(f.currentTarget);
+                                        }}
+                                        edge="end"
+                                    >
+                                        <Icon>more_vert</Icon>
+                                    </IconButton>
+                                }
                                 disableGutters
                             >
-                                <ListItemAvatar><Avatar sx={{ bgcolor: e.active ? 'primary.light' : undefined }}>{e.name[0]}</Avatar></ListItemAvatar>
+                                <ListItemAvatar><Avatar sx={{ bgcolor: e.is_active ? 'primary.light' : undefined }}>{e.name[0]}</Avatar></ListItemAvatar>
                                 <ListItemText>{e.name}</ListItemText>
                             </ListItem>
                         )}
@@ -72,6 +117,61 @@ export default function DialogMembers({
                     <Button onClick={onClose} color="inherit">Close</Button>
                 </DialogActions>
             </Dialog>
+            {member && anchor &&
+                <Menu open anchorEl={anchor} onClose={() => setAnchor(undefined)}>
+                    <MenuItem onClick={handleRename}>Rename</MenuItem>
+                    <MenuItem onClick={handleHide}>{member.is_active ? 'Hide' : 'Unhide'}</MenuItem>
+                    <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                </Menu>
+            }
+            {member && open &&
+                <DialogRename
+                    member={member}
+                    onSave={onChange}
+                    onClose={() => setOpen(false)}
+                />
+            }
         </>
     );
+}
+
+function DialogRename({
+    member,
+    onSave,
+    onClose,
+}: {
+    member: Member,
+    onSave: () => Promise<void>,
+    onClose: () => void,
+}) {
+    const [name, setName] = useState(member.name);
+    const [loading, setLoading] = useState(false);
+    const toast = useToast();
+
+    const handleClick = async () => {
+        try {
+            setLoading(true);
+            await patchMemberName(member.id, name);
+            await onSave();
+            onClose();
+            toast('Success', 'Member updated.');
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Dialog open onClose={onClose}>
+            <DialogTitle>Rename</DialogTitle>
+            <DialogContent dividers>
+                <TextField value={name} onChange={e => setName(e.target.value)} />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose} color="inherit">Close</Button>
+                <Button onClick={handleClick} loading={loading} variant="contained">Save</Button>
+            </DialogActions>
+        </Dialog>
+    )
 }

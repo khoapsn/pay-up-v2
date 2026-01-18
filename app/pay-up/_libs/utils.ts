@@ -1,4 +1,4 @@
-import { Exchange, Project } from "./models";
+import { Exchange, Member, Project } from "./models";
 
 export const storeProject = (project: Project) => {
     const projects = retrieveProjects();
@@ -19,3 +19,7 @@ export const convertAmount = (amount: number, from: string, to: string, exchange
     const toRate = exchanges.find(e => e.currency === to)?.rate || 1;
     return amount * fromRate / toRate;
 }
+
+// export const findMemberName = (member_id: string, members: Member[]): string => {
+//     return members.find(e => e.id === member_id)?.name ?? member_id;
+// }

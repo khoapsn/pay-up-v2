@@ -1,15 +1,30 @@
 import { useToast } from "@/app/_libs/contexts";
 import { Avatar, Card, CardContent, CardHeader, Icon, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, ListSubheader, Stack, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useExchanges, useProject } from "../../_libs/contexts";
+import dayjs from "dayjs";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { useExchanges, useMembers, useProject } from "../../_libs/contexts";
 import { getExpenses } from "../../_libs/data";
 import { Expense } from "../../_libs/models";
 import { convertAmount } from "../../_libs/utils";
+import DialogExpense, { DialogExpenseEdit } from "./dialog-expense";
 
-export default function CardExpenses() {
+const now = dayjs();
+
+export default function CardExpenses({ onChangeMembers }: { onChangeMembers: () => Promise<void>, }) {
     const project = useProject();
+    const members = useMembers();
     const [expenses, setExpenses] = useState<Expense[]>();
+    const [id, setId] = useState<string>();
+    const [open, setOpen] = useState(false);
     const toast = useToast();
+
+    const expense = useMemo(() => expenses?.find(e => e.id === id), [expenses, id]);
+    const groups = new Map<string, Expense[]>();
+    expenses?.forEach(e => {
+        const key = dayjs(e.time).format('YYYY-MM-DD');
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)?.push(e);
+    });
 
     const refresh = async () => {
         try {
@@ -32,47 +47,64 @@ export default function CardExpenses() {
                         <CardHeader
                             title="Expenses"
                             slotProps={{ title: { color: 'primary' } }}
-                            action={<IconButton color="primary"><Icon>add</Icon></IconButton>}
+                            action={<IconButton onClick={() => setOpen(true)}><Icon>add</Icon></IconButton>}
                         />
                         <List dense>
-                            <ListSubheader component={"div"} color="primary">Today</ListSubheader>
-                            {expenses.map(e =>
-                                <ListItemButton key={e.id}>
-                                    {/* <ListItemAvatar>
-                                        <Avatar sx={{ bgcolor: 'primary.light' }}><Icon>receipt</Icon></Avatar>
-                                    </ListItemAvatar> */}
-                                    <ListItemText
-                                        slotProps={{ primary: { color: 'secondary' } }}
-                                        secondary={`${e.paid_by.name} → ${e.paid_for.map(f => f.member.name).join(', ')}`}
-                                    >
-                                        {e.title}
-                                    </ListItemText>
-                                    <ListItemText
-                                        secondary={e.currency}
-                                        sx={{ textAlign: 'end' }}
-                                    >
-                                        <b>{e.amount.toLocaleString('en')}</b>
-                                    </ListItemText>
-                                </ListItemButton>
-                            )}
-                            {expenses.map(e =>
-                                <ListItemButton key={e.id}>
-                                    <ListItemText
-                                        secondary={`${e.paid_by.name} → ${e.paid_for.map(f => f.member.name).join(', ')}`}
-                                    >
-                                        {e.title}
-                                    </ListItemText>
-                                    <ListItemText
-                                        secondary={e.currency}
-                                        sx={{ textAlign: 'end' }}
-                                    >
-                                        <b>{e.amount.toLocaleString('en')}</b>
-                                    </ListItemText>
-                                </ListItemButton>
-                            )}
+                            {Array.from(groups).map(e => {
+                                const keyDay = dayjs(e[0]);
+                                const subheader =
+                                    keyDay.isSame(now, 'day') ? 'Today' :
+                                        keyDay.isSame(now.add(-1, 'day'), 'day') ? 'Yesterday' :
+                                            dayjs(e[0]).format('ddd, DD/MM/YYYY');
+
+                                return (
+                                    <Fragment key={e[0]}>
+                                        <ListSubheader>{subheader}</ListSubheader>
+                                        {e[1].map(f =>
+                                            <ListItemButton
+                                                key={f.id}
+                                                onClick={() => setId(f.id)}
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar sx={{ bgcolor: `${f.is_tranfer ? 'secondary' : 'primary'}.light` }}>
+                                                        <Icon>{f.is_tranfer ? 'currency_exchange' : 'receipt'}</Icon>
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    // slotProps={{ primary: { color: 'primary.light' } }}
+                                                    secondary={`${members.get(f.paid_by)?.name} → ${f.paid_fors.map(g => members.get(g.member_id)?.name).join(', ')}`}
+                                                >
+                                                    {f.title}
+                                                </ListItemText>
+                                                <ListItemText
+                                                    secondary={f.currency}
+                                                    sx={{ textAlign: 'end' }}
+                                                >
+                                                    {f.amount.toLocaleString()}
+                                                </ListItemText>
+                                            </ListItemButton>
+                                        )}
+                                    </Fragment>
+                                )
+                            })}
                         </List>
                     </Card>
                 </Stack >
+            }
+            {expense &&
+                <DialogExpense
+                    expense={expense}
+                    onChange={refresh}
+                    onChangeMembers={onChangeMembers}
+                    onClose={() => setId(undefined)}
+                />
+            }
+            {open &&
+                <DialogExpenseEdit
+                    onSave={refresh}
+                    onChangeMembers={onChangeMembers}
+                    onClose={() => setOpen(false)}
+                />
             }
         </>
     );
@@ -92,7 +124,7 @@ function CardSummary({ expenses }: { expenses: Expense[] }) {
             />
             <CardContent>
                 <Typography>Total expenses</Typography>
-                <Typography variant="h5">{total.toLocaleString('en')} {project.currency}</Typography>
+                <Typography variant="h5">{total.toLocaleString()} {project.currency}</Typography>
             </CardContent>
         </Card>
     );

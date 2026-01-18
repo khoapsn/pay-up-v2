@@ -1,7 +1,7 @@
 'use server';
 
 import { neon } from "@neondatabase/serverless";
-import { Currency, Exchange, Expense, Member, PaidFor, Project } from "./models";
+import { Currency, Exchange, Expense, Member, Project } from "./models";
 
 const connectionString = process.env.DATABASE_URL ?? '';
 const sql = neon(connectionString);
@@ -39,60 +39,108 @@ export const patchProjectCurrency = async (project_id: string, currency: string)
     await sql`UPDATE pay_up.projects SET currency=${currency} WHERE id=${project_id}`;
 }
 
-export const getMembers = async (project_id: string): Promise<Member[]> => {
-    return await sql`
+export const getMembers = async (project_id: string): Promise<Map<string, Member>> => {
+    const data = await sql`
         SELECT *
         FROM pay_up.members
         WHERE project_id=${project_id}
         ORDER BY name
-    ` as Member[];
+    `;
+
+    const result = new Map<string, Member>();
+    data.forEach(e => result.set(e.id, e as Member));
+
+    return result;
 }
 
 export const postMember = async (project_id: string, name: string) => {
-    await sql`
-        INSERT INTO pay_up.members (project_id, name)
-        VALUES (${project_id}, ${name})
-    `;
+    await sql`INSERT INTO pay_up.members (project_id, name) VALUES (${project_id}, ${name.trim()})`;
+}
+
+export const patchMemberName = async (member_id: string, name: string) => {
+    await sql`UPDATE pay_up.members SET name=${name} WHERE id=${member_id}`;
+}
+
+export const patchMemberIsActive = async (member_id: string, is_active: boolean) => {
+    await sql`UPDATE pay_up.members SET is_active=${is_active} WHERE id=${member_id}`;
+}
+
+export const deleteMember = async (member_id: string) => {
+    await sql`DELETE FROM pay_up.members WHERE id=${member_id}`;
 }
 
 export const getExpenses = async (project_id: string): Promise<Expense[]> => {
-    const expenses = await sql`
-        SELECT a.*, b.name AS paid_by_name
+    const data = await sql`
+        SELECT
+            a.*,
+            COALESCE(
+                json_agg(
+                    json_build_object('member_id', b.member_id, 'weight', b.weight)
+                ) FILTER (WHERE b.member_id IS NOT NULL),
+                '[]'
+            ) AS paid_fors
         FROM pay_up.expenses a
-        LEFT JOIN pay_up.members b ON a.paid_by=b.id
+        LEFT JOIN pay_up.paid_fors b ON a.id=b.expense_id
         WHERE a.project_id=${project_id}
+        GROUP BY a.id
+        ORDER BY a.time DESC
     `;
 
-    const paidFors = await sql`
-        SELECT a.*, b.name AS paid_for_name
-        FROM pay_up.paid_fors a
-        LEFT JOIN pay_up.members b ON a.member_id=b.id
-        WHERE expense_id IN (
-            SELECT id FROM pay_up.expenses WHERE project_id=${project_id}
-        );
-    `;
+    return data.map(e => {
+        const expense: Expense = {
+            id: e.id,
+            project_id: e.project_id,
+            title: e.title,
+            description: e.description,
+            amount: Number(e.amount),
+            currency: e.currency,
+            paid_by: e.paid_by,
+            paid_fors: e.paid_fors,
+            time: e.time,
+            is_tranfer: e.is_tranfer,
+        };
 
-    return expenses.map(e => ({
-        id: e.id,
-        title: e.title,
-        amount: Number(e.amount),
-        currency: e.currency,
-        paid_by: {
-            id: e.paid_by,
-            name: e.paid_by_name,
-        } as Member,
-        paid_for:
-            paidFors
-                .filter(f => f.expense_id === e.id)
-                .map(f => ({
-                    member: {
-                        id: f.member_id,
-                        name: f.paid_for_name,
-                    },
-                    weight: f.weight,
-                }) as PaidFor),
-        time: e.time,
-    }) as Expense);
+        return expense;
+    })
+}
+
+export const postExpense = async (expense: Expense) => {
+    await sql`
+        INSERT INTO pay_up.expenses ()
+        VALUES ()
+    `;
+}
+
+export const patchExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
+    const newMembersArr = [...newMembers.values()];
+    for (let i = 0; i < newMembersArr.length; i++) {
+        const newNember = newMembersArr[i];
+        await sql`
+            INSERT INTO pay_up.members (id, project_id, name) 
+            VALUES (${newNember.id}, ${expense.project_id}, ${newNember.name})
+        `;
+    };
+
+    await sql`DELETE FROM pay_up.paid_fors WHERE expense_id=${expense.id}`;
+
+    const paidForsArr = expense.paid_fors;
+    for (let i = 0; i < paidForsArr.length; i++) {
+        const paidFor = paidForsArr[i];
+        await sql`
+            INSERT INTO pay_up.paid_fors (expense_id, member_id, weight)
+            VALUES (${expense.id}, ${paidFor.member_id}, ${paidFor.weight})
+        `;
+    };
+
+    await sql`
+        UPDATE pay_up.expenses
+        SET
+            title=${expense.title},
+            description=${expense.description},
+            amount=${expense.amount},
+            time=${expense.time}
+        WHERE id=${expense.id}
+    `;
 }
 
 export const getExchanges = async (project_id: string): Promise<Exchange[]> => {

@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import { Currency, Exchange, Member, Project } from "./models";
 
 export const ProjectContext = createContext<Project>({} as Project);
-export const MembersContext = createContext<Member[]>([]);
+export const MembersContext = createContext<Map<string, Member>>(new Map());
 export const ExchangesContext = createContext<Exchange[]>([]);
 export const CurrenciesContext = createContext<Currency[]>([]);
 
