@@ -21,7 +21,7 @@ export type Expense = {
     paid_by: string,
     paid_fors: PaidFor[],
     time: Date,
-    is_tranfer: boolean,
+    is_excluded: boolean,
 }
 
 export const newExpense = (project: Project): Expense => ({
@@ -33,7 +33,7 @@ export const newExpense = (project: Project): Expense => ({
     paid_by: '',
     paid_fors: [],
     time: new Date(),
-    is_tranfer: false,
+    is_excluded: false,
 })
 
 export type PaidFor = {

@@ -97,22 +97,19 @@ export const getExpenses = async (project_id: string): Promise<Expense[]> => {
             paid_by: e.paid_by,
             paid_fors: e.paid_fors,
             time: e.time,
-            is_tranfer: e.is_tranfer,
+            is_excluded: e.is_excluded,
         };
 
         return expense;
     })
 }
 
-export const postExpense = async (expense: Expense) => {
-    await sql`
-        INSERT INTO pay_up.expenses ()
-        VALUES ()
-    `;
-}
-
-export const patchExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
-    const newMembersArr = [...newMembers.values()];
+export const postExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
+    const expenseMembers = [
+        ...expense.paid_fors.map(f => f.member_id),
+        expense.paid_by,
+    ];
+    const newMembersArr = [...newMembers.values()].filter(e => expenseMembers.includes(e.id));
     for (let i = 0; i < newMembersArr.length; i++) {
         const newNember = newMembersArr[i];
         await sql`
@@ -120,6 +117,58 @@ export const patchExpense = async (expense: Expense, newMembers: Map<string, Mem
             VALUES (${newNember.id}, ${expense.project_id}, ${newNember.name})
         `;
     };
+
+    const returning = await sql`
+        INSERT INTO pay_up.expenses (project_id, title, amount, currency, paid_by, time, is_excluded, description)
+        VALUES (
+            ${expense.project_id},
+            ${expense.title || 'Untitled'},
+            ${expense.amount},
+            ${expense.currency},
+            ${expense.paid_by},
+            ${expense.time},
+            ${expense.is_excluded},
+            ${expense.description}
+        )
+        RETURNING id
+    `;
+
+    const paidForsArr = expense.paid_fors;
+    for (let i = 0; i < paidForsArr.length; i++) {
+        const paidFor = paidForsArr[i];
+        await sql`
+            INSERT INTO pay_up.paid_fors (expense_id, member_id, weight)
+            VALUES (${returning[0].id}, ${paidFor.member_id}, ${paidFor.weight})
+        `;
+    };
+}
+
+export const patchExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
+    const expenseMembers = [
+        ...expense.paid_fors.map(f => f.member_id),
+        expense.paid_by,
+    ];
+    const newMembersArr = [...newMembers.values()].filter(e => expenseMembers.includes(e.id));
+    for (let i = 0; i < newMembersArr.length; i++) {
+        const newNember = newMembersArr[i];
+        await sql`
+            INSERT INTO pay_up.members (id, project_id, name) 
+            VALUES (${newNember.id}, ${expense.project_id}, ${newNember.name})
+        `;
+    };
+
+    await sql`
+        UPDATE pay_up.expenses
+        SET
+            title=${expense.title || 'Untitled'},
+            amount=${expense.amount},
+            currency=${expense.currency},
+            paid_by=${expense.paid_by},
+            time=${expense.time},
+            is_excluded=${expense.is_excluded},
+            description=${expense.description}
+        WHERE id=${expense.id}
+    `;
 
     await sql`DELETE FROM pay_up.paid_fors WHERE expense_id=${expense.id}`;
 
@@ -131,16 +180,10 @@ export const patchExpense = async (expense: Expense, newMembers: Map<string, Mem
             VALUES (${expense.id}, ${paidFor.member_id}, ${paidFor.weight})
         `;
     };
+}
 
-    await sql`
-        UPDATE pay_up.expenses
-        SET
-            title=${expense.title},
-            description=${expense.description},
-            amount=${expense.amount},
-            time=${expense.time}
-        WHERE id=${expense.id}
-    `;
+export const deleteExpense = async (expense_id: string) => {
+    await sql`DELETE FROM pay_up.expenses WHERE id=${expense_id}`;
 }
 
 export const getExchanges = async (project_id: string): Promise<Exchange[]> => {

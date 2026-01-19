@@ -66,8 +66,8 @@ export default function CardExpenses({ onChangeMembers }: { onChangeMembers: () 
                                                 onClick={() => setId(f.id)}
                                             >
                                                 <ListItemAvatar>
-                                                    <Avatar sx={{ bgcolor: `${f.is_tranfer ? 'secondary' : 'primary'}.light` }}>
-                                                        <Icon>{f.is_tranfer ? 'currency_exchange' : 'receipt'}</Icon>
+                                                    <Avatar sx={{ bgcolor: f.is_excluded ? undefined : 'primary.light' }}>
+                                                        <Icon>receipt</Icon>
                                                     </Avatar>
                                                 </ListItemAvatar>
                                                 <ListItemText
