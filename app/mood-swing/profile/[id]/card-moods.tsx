@@ -129,7 +129,7 @@ function DialogMoodPicker({
                                     {e.value === value ? 'radio_button_checked' : 'circle'}
                                 </Icon>
                             </ListItemIcon>
-                            <ListItemText sx={{ textTransform: 'capitalize' }}>{e.value}</ListItemText>
+                            <ListItemText sx={{ textTransform: 'capitalize' }}>{e.text || e.value}</ListItemText>
                         </ListItemButton>
                     )}
                 </List>

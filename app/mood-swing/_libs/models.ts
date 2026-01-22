@@ -23,6 +23,7 @@ export enum MoodValue {
 export type MoodValueOption = {
     value: MoodValue,
     color: string,
+    text?: string,
 }
 
 export const moodValueOptions: MoodValueOption[] = [

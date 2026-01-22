@@ -5,8 +5,9 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { useExchanges, useMembers, useProject } from "../../_libs/contexts";
 import { getExpenses } from "../../_libs/data";
 import { Expense } from "../../_libs/models";
-import { convertAmount } from "../../_libs/utils";
-import DialogExpense, { DialogExpenseEdit } from "./dialog-expense";
+import { convertAmount, getAmountAfterDiscount } from "../../_libs/utils";
+import DialogExpense from "./dialog-expense";
+import { DialogExpenseEdit } from "./dialog-expense-edit";
 
 const now = dayjs();
 
@@ -80,7 +81,7 @@ export default function CardExpenses({ onChangeMembers }: { onChangeMembers: () 
                                                     secondary={f.currency}
                                                     sx={{ textAlign: 'end' }}
                                                 >
-                                                    {f.amount.toLocaleString()}
+                                                    {getAmountAfterDiscount(f.amount, f.discount_value, f.discount_type).toLocaleString()}
                                                 </ListItemText>
                                             </ListItemButton>
                                         )}
@@ -113,7 +114,13 @@ export default function CardExpenses({ onChangeMembers }: { onChangeMembers: () 
 function CardSummary({ expenses }: { expenses: Expense[] }) {
     const project = useProject();
     const exchanges = useExchanges();
-    const total = expenses.reduce((p, c) => p + convertAmount(c.amount, c.currency, project.currency, exchanges), 0);
+    const total =
+        expenses
+            .filter(e => !e.is_excluded)
+            .reduce((p, c) =>
+                p + convertAmount(getAmountAfterDiscount(c.amount, c.discount_value, c.discount_type), c.currency, project.currency, exchanges),
+                0
+            );
 
     return (
         <Card>

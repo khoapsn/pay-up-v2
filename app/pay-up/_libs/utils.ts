@@ -1,4 +1,4 @@
-import { Exchange, Member, Project } from "./models";
+import { DiscountType, Exchange, Project } from "./models";
 
 export const storeProject = (project: Project) => {
     const projects = retrieveProjects();
@@ -20,6 +20,11 @@ export const convertAmount = (amount: number, from: string, to: string, exchange
     return amount * fromRate / toRate;
 }
 
-// export const findMemberName = (member_id: string, members: Member[]): string => {
-//     return members.find(e => e.id === member_id)?.name ?? member_id;
-// }
+export const getAmountAfterDiscount = (amount: number, discountValue: number, discountType: DiscountType): number => {
+    if (discountType === DiscountType.Amount)
+        return amount - discountValue;
+    else if (discountType === DiscountType.Percent)
+        return amount * (100 - discountValue) / 100;
+    else
+        return amount;
+}

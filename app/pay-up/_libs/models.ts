@@ -11,6 +11,11 @@ export type Currency = {
     currency: string,
 }
 
+export enum DiscountType {
+    Percent = 'percent',
+    Amount = 'amount',
+}
+
 export type Expense = {
     id: string,
     project_id: string,
@@ -22,6 +27,8 @@ export type Expense = {
     paid_fors: PaidFor[],
     time: Date,
     is_excluded: boolean,
+    discount_type: DiscountType,
+    discount_value: number,
 }
 
 export const newExpense = (project: Project): Expense => ({
@@ -34,6 +41,8 @@ export const newExpense = (project: Project): Expense => ({
     paid_fors: [],
     time: new Date(),
     is_excluded: false,
+    discount_type: DiscountType.Percent,
+    discount_value: 0,
 })
 
 export type PaidFor = {

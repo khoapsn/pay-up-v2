@@ -98,6 +98,8 @@ export const getExpenses = async (project_id: string): Promise<Expense[]> => {
             paid_fors: e.paid_fors,
             time: e.time,
             is_excluded: e.is_excluded,
+            discount_type: e.discount_type,
+            discount_value: Number(e.discount_value),
         };
 
         return expense;
@@ -119,7 +121,7 @@ export const postExpense = async (expense: Expense, newMembers: Map<string, Memb
     };
 
     const returning = await sql`
-        INSERT INTO pay_up.expenses (project_id, title, amount, currency, paid_by, time, is_excluded, description)
+        INSERT INTO pay_up.expenses (project_id, title, amount, currency, paid_by, time, is_excluded, description, discount_value, discount_type)
         VALUES (
             ${expense.project_id},
             ${expense.title || 'Untitled'},
@@ -128,7 +130,9 @@ export const postExpense = async (expense: Expense, newMembers: Map<string, Memb
             ${expense.paid_by},
             ${expense.time},
             ${expense.is_excluded},
-            ${expense.description}
+            ${expense.description},
+            ${expense.discount_value},
+            ${expense.discount_type}
         )
         RETURNING id
     `;
@@ -166,7 +170,9 @@ export const patchExpense = async (expense: Expense, newMembers: Map<string, Mem
             paid_by=${expense.paid_by},
             time=${expense.time},
             is_excluded=${expense.is_excluded},
-            description=${expense.description}
+            description=${expense.description},
+            discount_value=${expense.discount_value},
+            discount_type=${expense.discount_type}
         WHERE id=${expense.id}
     `;
 
