@@ -28,24 +28,24 @@ export function DialogExpenseEdit({
     const [anchor, setAnchor] = useState<HTMLElement>();
     const [anchor2, setAnchor2] = useState<HTMLElement>();
     const [tempPaidForIdx, setPaidForIdx] = useState(0);
-    const paidForIdx = Math.min(tempPaidForIdx, item.paid_fors.length - 1);
+    const paidForIdx = Math.min(tempPaidForIdx, item.paidFors.length - 1);
     const toast = useToast();
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const activeMembersArr = [...members.values()].filter(e => e.is_active);
+    const activeMembersArr = [...members.values()].filter(e => e.isActive);
     const newMembersRef = useRef(new Map<string, Member>());
     const allMembersMap = new Map([...members.entries(), ...newMembersRef.current.entries()]);
     const allMembersArr = [...members.values(), ...newMembersRef.current.values()];
 
     const handleClick = async () => {
         try {
-            if (!allMembersMap.get(item.paid_by)?.name) {
+            if (!allMembersMap.get(item.paidBy)?.name) {
                 toast('Invalid', '<Paid by> is missing.', 'warning');
                 return;
             }
 
-            if (!item.paid_fors.length) {
+            if (!item.paidFors.length) {
                 toast('Invalid', '<Paid for> is missing.', 'warning');
                 return;
             }
@@ -85,12 +85,12 @@ export function DialogExpenseEdit({
             newPaidBy = find.id;
         } else {
             const id = v4();
-            const newMember: Member = { id, name, is_active: true };
+            const newMember: Member = { id, name, isActive: true };
             newMembersRef.current.set(id, newMember);
             newPaidBy = id;
         }
 
-        setItem({ ...item, paid_by: newPaidBy });
+        setItem({ ...item, paidBy: newPaidBy });
     };
 
     const handleChangePaidFors = (_: any, values: string[]) => {
@@ -98,7 +98,7 @@ export function DialogExpenseEdit({
 
         values.forEach(e => {
             const name = e.trim();
-            const findWithinPaidFors = item.paid_fors.find(f => allMembersMap.get(f.member_id)?.name === name);
+            const findWithinPaidFors = item.paidFors.find(f => allMembersMap.get(f.member_id)?.name === name);
 
             if (findWithinPaidFors)
                 newPaidFors.push(findWithinPaidFors);
@@ -109,14 +109,14 @@ export function DialogExpenseEdit({
                     newPaidFors.push({ member_id: findWithinAllMembers.id, weight: 1 });
                 } else {
                     const id = v4();
-                    const newMember: Member = { id, name, is_active: true };
+                    const newMember: Member = { id, name, isActive: true };
                     newMembersRef.current.set(id, newMember);
                     newPaidFors.push({ member_id: id, weight: 1 });
                 }
             }
         });
 
-        setItem({ ...item, paid_fors: newPaidFors });
+        setItem({ ...item, paidFors: newPaidFors });
     };
 
     return (
@@ -162,13 +162,13 @@ export function DialogExpenseEdit({
                         <Autocomplete
                             freeSolo
                             options={activeMembersArr.map(e => e.name)}
-                            value={allMembersMap.get(item.paid_by)?.name ?? ''}
+                            value={allMembersMap.get(item.paidBy)?.name ?? ''}
                             onInputChange={handleChangePaidBy}
                             renderInput={params => <TextField {...params} label="Paid by" />}
                             selectOnFocus clearOnBlur
                         />
                         <Button
-                            onClick={() => setItem({ ...item, paid_fors: activeMembersArr.map(e => ({ member_id: e.id, weight: 1 })) })}
+                            onClick={() => setItem({ ...item, paidFors: activeMembersArr.map(e => ({ member_id: e.id, weight: 1 })) })}
                             size="small" color="inherit" variant="contained" disableElevation
                             sx={{ justifyContent: 'flex-start', width: 'fit-content' }}
                         >
@@ -177,7 +177,7 @@ export function DialogExpenseEdit({
                         <Autocomplete
                             multiple freeSolo
                             options={activeMembersArr.map(e => e.name)}
-                            value={item.paid_fors.map(e => allMembersMap.get(e.member_id)?.name ?? '')}
+                            value={item.paidFors.map(e => allMembersMap.get(e.member_id)?.name ?? '')}
                             onChange={handleChangePaidFors}
                             renderInput={params => <TextField {...params} label="Paid for" />}
                             disableCloseOnSelect
@@ -187,8 +187,8 @@ export function DialogExpenseEdit({
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={item.is_excluded}
-                                        onChange={e => setItem({ ...item, is_excluded: e.target.checked })}
+                                        checked={item.isExcluded}
+                                        onChange={e => setItem({ ...item, isExcluded: e.target.checked })}
                                         sx={{ py: 0 }}
                                     />
                                 }
@@ -206,22 +206,28 @@ export function DialogExpenseEdit({
                                 <TextField
                                     label="Discount"
                                     type="number"
-                                    value={item.discount_value}
+                                    value={item.discountValue}
                                     onChange={e => {
                                         const value = Number(e.target.value);
-                                        if (value >= 0 && value <= 100) setItem({ ...item, discount_value: value });
+                                        if (
+                                            value >= 0 && (
+                                                (item.discountType === DiscountType.Percent && value <= 100) ||
+                                                (item.discountType === DiscountType.Amount && value <= item.amount)
+                                            )
+                                        )
+                                            setItem({ ...item, discountValue: value });
                                     }}
                                     slotProps={{
                                         input: {
                                             endAdornment:
                                                 <Button
-                                                    onClick={() => setItem({ ...item, discount_type: item.discount_type === DiscountType.Amount ? DiscountType.Percent : DiscountType.Amount })}
+                                                    onClick={() => setItem({ ...item, discountType: item.discountType === DiscountType.Amount ? DiscountType.Percent : DiscountType.Amount })}
                                                     variant="contained"
                                                     color="inherit"
                                                     sx={{ ml: 1 }}
                                                     disableElevation
                                                 >
-                                                    {item.discount_type === DiscountType.Percent ? '%' : item.currency}
+                                                    {item.discountType === DiscountType.Percent ? '%' : item.currency}
                                                 </Button>
                                         },
                                     }}
@@ -229,13 +235,13 @@ export function DialogExpenseEdit({
                                 />
                             </Grid>
                             <Grid size={6}>
-                                {item.paid_fors.length > 1 &&
+                                {item.paidFors.length > 1 &&
                                     <TextField
                                         label="Weight of"
                                         type="number"
-                                        value={item.paid_fors[paidForIdx].weight}
+                                        value={item.paidFors[paidForIdx].weight}
                                         onChange={e => {
-                                            item.paid_fors[paidForIdx].weight = Number(e.target.value);
+                                            item.paidFors[paidForIdx].weight = Number(e.target.value);
                                             setItem({ ...item });
                                         }}
                                         slotProps={{
@@ -248,7 +254,7 @@ export function DialogExpenseEdit({
                                                         sx={{ mr: 1 }}
                                                         disableElevation
                                                     >
-                                                        {allMembersMap.get(item.paid_fors[paidForIdx].member_id)?.name}
+                                                        {allMembersMap.get(item.paidFors[paidForIdx].member_id)?.name}
                                                     </Button>
                                             },
                                         }}
@@ -285,11 +291,11 @@ export function DialogExpenseEdit({
             </Menu>
             <Menu open={!!anchor2} anchorEl={anchor2} onClose={() => setAnchor2(undefined)}>
                 <List>
-                    {item.paid_fors.map((e, i) =>
+                    {item.paidFors.map((e, i) =>
                         <ListItemButton
                             key={e.member_id}
                             onClick={() => { setPaidForIdx(i); setAnchor2(undefined) }}
-                            selected={e.member_id === item.paid_fors[paidForIdx].member_id}
+                            selected={e.member_id === item.paidFors[paidForIdx].member_id}
                         >
                             {allMembersMap.get(e.member_id)?.name}
                         </ListItemButton>

@@ -1,4 +1,4 @@
-import { DiscountType, Exchange, Project } from "./models";
+import { DiscountType, Exchange, Expense, Project } from "./models";
 
 export const storeProject = (project: Project) => {
     const projects = retrieveProjects();
@@ -28,3 +28,36 @@ export const getAmountAfterDiscount = (amount: number, discountValue: number, di
     else
         return amount;
 }
+
+export const getTotalSpent = (expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number => {
+    return expenses
+        .filter(e => !e.isExcluded)
+        .reduce((p, c) => p + convertAmount(getAmountAfterDiscount(c.amount, c.discountValue, c.discountType), c.currency, baseCurrency, exchanges), 0);
+}
+
+const getTotalPaidOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number => {
+    return expenses
+        .filter(e => e.paidBy === memberId)
+        .reduce((p, c) => p + getPaidOf(c, baseCurrency, exchanges), 0);
+}
+
+const getPaidOf = (expense: Expense, baseCurrency: string, exchanges: Exchange[]): number => {
+    const amountOf = getAmountAfterDiscount(expense.amount, expense.discountValue, expense.discountType);
+    return convertAmount(amountOf, expense.currency, baseCurrency, exchanges);;
+}
+
+export const getTotalSpentOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[], isFiltered: boolean = false): number => {
+    return expenses
+        .filter(e => !(isFiltered && e.isExcluded))
+        .reduce((p, c) => p + getSpentOf(memberId, c, baseCurrency, exchanges), 0);
+}
+
+const getSpentOf = (memberId: string, expense: Expense, baseCurrency: string, exchanges: Exchange[]): number => {
+    const totalWeight = expense.paidFors.reduce((p, c) => p + c.weight, 0);
+    const ratio = (expense.paidFors.find(e => e.member_id === memberId)?.weight ?? 0) / totalWeight;
+    const amountOf = getAmountAfterDiscount(expense.amount, expense.discountValue, expense.discountType) * ratio;
+    return convertAmount(amountOf, expense.currency, baseCurrency, exchanges);
+}
+
+export const getBalanceOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number =>
+    getTotalPaidOf(memberId, expenses, baseCurrency, exchanges) - getTotalSpentOf(memberId, expenses, baseCurrency, exchanges);

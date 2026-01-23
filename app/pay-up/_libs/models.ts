@@ -18,31 +18,31 @@ export enum DiscountType {
 
 export type Expense = {
     id: string,
-    project_id: string,
+    projectId: string,
     title: string,
     description?: string,
     amount: number,
     currency: string,
-    paid_by: string,
-    paid_fors: PaidFor[],
+    paidBy: string,
+    paidFors: PaidFor[],
     time: Date,
-    is_excluded: boolean,
-    discount_type: DiscountType,
-    discount_value: number,
+    isExcluded: boolean,
+    discountType: DiscountType,
+    discountValue: number,
 }
 
 export const newExpense = (project: Project): Expense => ({
     id: '',
-    project_id: project.id,
+    projectId: project.id,
     title: '',
     amount: 0,
     currency: project.currency,
-    paid_by: '',
-    paid_fors: [],
+    paidBy: '',
+    paidFors: [],
     time: new Date(),
-    is_excluded: false,
-    discount_type: DiscountType.Percent,
-    discount_value: 0,
+    isExcluded: false,
+    discountType: DiscountType.Percent,
+    discountValue: 0,
 })
 
 export type PaidFor = {
@@ -53,11 +53,11 @@ export type PaidFor = {
 export type Member = {
     id: string,
     name: string,
-    is_active: boolean,
+    isActive: boolean,
 }
 
 export type Exchange = {
-    project_id: string,
+    projectId: string,
     currency: string,
     rate: number,
 }

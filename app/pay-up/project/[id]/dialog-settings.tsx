@@ -8,7 +8,7 @@ import { useProject } from "../../_libs/contexts";
 import { patchProject } from "../../_libs/data";
 import { Project } from "../../_libs/models";
 
-export default function DialogProject({
+export default function DialogSettings({
     onSave,
     onClose,
 }: {
@@ -36,7 +36,7 @@ export default function DialogProject({
 
     return (
         <Dialog open onClose={onClose} fullWidth>
-            <DialogTitle>Project Settings</DialogTitle>
+            <DialogTitle>Settings</DialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>
                     <Grid size={12}>

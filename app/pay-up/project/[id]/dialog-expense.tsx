@@ -23,8 +23,8 @@ export default function DialogExpense({
     const exchanges = useExchanges();
     const [open, setOpen] = useState(false);
     const [openDel, setOpenDel] = useState(false);
-    const totalWeights = expense.paid_fors.reduce((p, c) => p + c.weight, 0);
-    const amountAfterDiscount = getAmountAfterDiscount(expense.amount, expense.discount_value, expense.discount_type);
+    const totalWeights = expense.paidFors.reduce((p, c) => p + c.weight, 0);
+    const amountAfterDiscount = getAmountAfterDiscount(expense.amount, expense.discountValue, expense.discountType);
 
     return (
         <>
@@ -39,19 +39,19 @@ export default function DialogExpense({
                             <br />
                         </>
                     }
-                    <Divider />
                     <List>
-                        {expense.paid_fors.map(e => {
+                        {expense.paidFors.map(e => {
                             const amount = amountAfterDiscount * e.weight / totalWeights;
 
                             return (
-                                <ListItem key={e.member_id} disableGutters alignItems="flex-start">
+                                <ListItem key={e.member_id} disableGutters alignItems="flex-start" sx={{ pt: 0 }}>
                                     <ListItemText>
                                         {members.get(e.member_id)?.name}
                                     </ListItemText>
                                     <ListItemText
                                         secondary={
-                                            expense.currency !== project.currency && `~ ${convertAmount(amount, expense.currency, project.currency, exchanges).toLocaleString()} ${project.currency}`
+                                            expense.currency !== project.currency &&
+                                            `~ ${convertAmount(amount, expense.currency, project.currency, exchanges).toLocaleString()} ${project.currency}`
                                         }
                                         sx={{ textAlign: 'end' }}
                                     >
@@ -70,7 +70,7 @@ export default function DialogExpense({
                                 }
                                 sx={{ textAlign: 'end' }}
                             >
-                                {expense.discount_value > 0 &&
+                                {expense.discountValue > 0 &&
                                     <Typography sx={{ textDecoration: 'line-through' }} color="textDisabled">
                                         {expense.amount.toLocaleString()} {expense.currency}
                                     </Typography>
@@ -80,14 +80,14 @@ export default function DialogExpense({
                         </ListItem>
                     </List>
                     <Typography textAlign={"end"} color="textSecondary" alignItems={"center"}>
-                        <i>Paid by {members.get(expense.paid_by)?.name}</i>
+                        <i>Paid by {members.get(expense.paidBy)?.name}</i>
                     </Typography>
-                    {expense.discount_value > 0 &&
+                    {expense.discountValue > 0 &&
                         <Typography textAlign={"end"} color="textSecondary">
-                            <i>Discount {expense.discount_value.toLocaleString()}{expense.discount_type === DiscountType.Amount ? ` ${expense.currency}` : '%'}</i>
+                            <i>{expense.discountValue.toLocaleString()}{expense.discountType === DiscountType.Amount ? ` ${expense.currency}` : '%'} discount</i>
                         </Typography>
                     }
-                    {expense.is_excluded &&
+                    {expense.isExcluded &&
                         <Typography textAlign={"end"} color="textSecondary">
                             <i>Excluded from total</i>
                         </Typography>

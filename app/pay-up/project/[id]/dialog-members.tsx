@@ -43,7 +43,7 @@ export default function DialogMembers({
     const handleHide = async () => {
         try {
             if (!member) return;
-            await patchMemberIsActive(member.id, !member.is_active);
+            await patchMemberIsActive(member.id, !member.isActive);
             await onChange();
             toast('Success', 'Member updated.');
         } catch (e) {
@@ -107,7 +107,7 @@ export default function DialogMembers({
                                 }
                                 disableGutters
                             >
-                                <ListItemAvatar><Avatar sx={{ bgcolor: e.is_active ? 'primary.light' : undefined }}>{e.name[0]}</Avatar></ListItemAvatar>
+                                <ListItemAvatar><Avatar sx={{ bgcolor: e.isActive ? 'primary.light' : undefined }}>{e.name[0]}</Avatar></ListItemAvatar>
                                 <ListItemText>{e.name}</ListItemText>
                             </ListItem>
                         )}
@@ -120,7 +120,7 @@ export default function DialogMembers({
             {member && anchor &&
                 <Menu open anchorEl={anchor} onClose={() => setAnchor(undefined)}>
                     <MenuItem onClick={handleRename}>Rename</MenuItem>
-                    <MenuItem onClick={handleHide}>{member.is_active ? 'Hide' : 'Unhide'}</MenuItem>
+                    <MenuItem onClick={handleHide}>{member.isActive ? 'Hide' : 'Unhide'}</MenuItem>
                     <MenuItem onClick={handleDelete}>Delete</MenuItem>
                 </Menu>
             }

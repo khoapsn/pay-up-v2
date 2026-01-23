@@ -1,7 +1,7 @@
 'use client';
 
 import { useToast } from "@/app/_libs/contexts";
-import { Card, CardContent, CardHeader, Icon, IconButton, Stack, Typography } from "@mui/material";
+import { Card, CardContent, CardHeader, Icon, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,7 +12,7 @@ import { storeProject } from "../../_libs/utils";
 import CardExpenses from "./card-expenses";
 import DialogCurrencies from "./dialog-currencies";
 import DialogMembers from "./dialog-members";
-import DialogProject from "./dialog-project";
+import DialogSettings from "./dialog-settings";
 
 export default function Page() {
     const { id } = useParams<{ id: string }>();
@@ -110,9 +110,15 @@ function CardProject({
                     slotProps={{ title: { color: 'primary' } }}
                     action={
                         <Stack direction={"row"}>
-                            <IconButton onClick={() => setOpenCurrs(true)}><Icon>paid</Icon></IconButton>
-                            <IconButton onClick={() => setOpenMembers(true)}><Icon>people_alt</Icon></IconButton>
-                            <IconButton onClick={() => setOpen(true)}><Icon>settings</Icon></IconButton>
+                            <Tooltip title="Currencies">
+                                <IconButton onClick={() => setOpenCurrs(true)}><Icon>paid</Icon></IconButton>
+                            </Tooltip>
+                            <Tooltip title="Members">
+                                <IconButton onClick={() => setOpenMembers(true)}><Icon>people_alt</Icon></IconButton>
+                            </Tooltip>
+                            <Tooltip title="Settings">
+                                <IconButton onClick={() => setOpen(true)}><Icon>settings</Icon></IconButton>
+                            </Tooltip>
                         </Stack>
                     }
                 />
@@ -121,7 +127,7 @@ function CardProject({
                 </CardContent>
             </Card>
             {open &&
-                <DialogProject
+                <DialogSettings
                     onSave={onChangeProject}
                     onClose={() => setOpen(false)}
                 />

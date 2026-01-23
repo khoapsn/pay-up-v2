@@ -6,8 +6,8 @@ import { Currency, Exchange, Expense, Member, Project } from "./models";
 const connectionString = process.env.DATABASE_URL ?? '';
 const sql = neon(connectionString);
 
-export const getProject = async (project_id: string): Promise<Project> => {
-    const data = await sql`SELECT * FROM pay_up.projects WHERE id=${project_id}`;
+export const getProject = async (projectId: string): Promise<Project> => {
+    const data = await sql`SELECT * FROM pay_up.projects WHERE id=${projectId}`;
     const row = data[0];
 
     return {
@@ -35,26 +35,30 @@ export const patchProject = async (project: Project) => {
     `;
 }
 
-export const patchProjectCurrency = async (project_id: string, currency: string) => {
-    await sql`UPDATE pay_up.projects SET currency=${currency} WHERE id=${project_id}`;
+export const patchProjectCurrency = async (projectId: string, currency: string) => {
+    await sql`UPDATE pay_up.projects SET currency=${currency} WHERE id=${projectId}`;
 }
 
-export const getMembers = async (project_id: string): Promise<Map<string, Member>> => {
+export const getMembers = async (projectId: string): Promise<Map<string, Member>> => {
     const data = await sql`
         SELECT *
         FROM pay_up.members
-        WHERE project_id=${project_id}
+        WHERE project_id=${projectId}
         ORDER BY name
     `;
 
     const result = new Map<string, Member>();
-    data.forEach(e => result.set(e.id, e as Member));
+    data.forEach(e => result.set(e.id, {
+        id: e.id,
+        name: e.name,
+        isActive: e.is_active,
+    }));
 
     return result;
 }
 
-export const postMember = async (project_id: string, name: string) => {
-    await sql`INSERT INTO pay_up.members (project_id, name) VALUES (${project_id}, ${name.trim()})`;
+export const postMember = async (projectId: string, name: string) => {
+    await sql`INSERT INTO pay_up.members (project_id, name) VALUES (${projectId}, ${name.trim()})`;
 }
 
 export const patchMemberName = async (member_id: string, name: string) => {
@@ -69,7 +73,7 @@ export const deleteMember = async (member_id: string) => {
     await sql`DELETE FROM pay_up.members WHERE id=${member_id}`;
 }
 
-export const getExpenses = async (project_id: string): Promise<Expense[]> => {
+export const getExpenses = async (projectId: string): Promise<Expense[]> => {
     const data = await sql`
         SELECT
             a.*,
@@ -81,7 +85,7 @@ export const getExpenses = async (project_id: string): Promise<Expense[]> => {
             ) AS paid_fors
         FROM pay_up.expenses a
         LEFT JOIN pay_up.paid_fors b ON a.id=b.expense_id
-        WHERE a.project_id=${project_id}
+        WHERE a.project_id=${projectId}
         GROUP BY a.id
         ORDER BY a.time DESC
     `;
@@ -89,17 +93,17 @@ export const getExpenses = async (project_id: string): Promise<Expense[]> => {
     return data.map(e => {
         const expense: Expense = {
             id: e.id,
-            project_id: e.project_id,
+            projectId: e.project_id,
             title: e.title,
             description: e.description,
             amount: Number(e.amount),
             currency: e.currency,
-            paid_by: e.paid_by,
-            paid_fors: e.paid_fors,
+            paidBy: e.paid_by,
+            paidFors: e.paid_fors,
             time: e.time,
-            is_excluded: e.is_excluded,
-            discount_type: e.discount_type,
-            discount_value: Number(e.discount_value),
+            isExcluded: e.is_excluded,
+            discountType: e.discount_type,
+            discountValue: Number(e.discount_value),
         };
 
         return expense;
@@ -108,36 +112,36 @@ export const getExpenses = async (project_id: string): Promise<Expense[]> => {
 
 export const postExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
     const expenseMembers = [
-        ...expense.paid_fors.map(f => f.member_id),
-        expense.paid_by,
+        ...expense.paidFors.map(f => f.member_id),
+        expense.paidBy,
     ];
     const newMembersArr = [...newMembers.values()].filter(e => expenseMembers.includes(e.id));
     for (let i = 0; i < newMembersArr.length; i++) {
         const newNember = newMembersArr[i];
         await sql`
             INSERT INTO pay_up.members (id, project_id, name) 
-            VALUES (${newNember.id}, ${expense.project_id}, ${newNember.name})
+            VALUES (${newNember.id}, ${expense.projectId}, ${newNember.name})
         `;
     };
 
     const returning = await sql`
         INSERT INTO pay_up.expenses (project_id, title, amount, currency, paid_by, time, is_excluded, description, discount_value, discount_type)
         VALUES (
-            ${expense.project_id},
+            ${expense.projectId},
             ${expense.title || 'Untitled'},
             ${expense.amount},
             ${expense.currency},
-            ${expense.paid_by},
+            ${expense.paidBy},
             ${expense.time},
-            ${expense.is_excluded},
+            ${expense.isExcluded},
             ${expense.description},
-            ${expense.discount_value},
-            ${expense.discount_type}
+            ${expense.discountValue},
+            ${expense.discountType}
         )
         RETURNING id
     `;
 
-    const paidForsArr = expense.paid_fors;
+    const paidForsArr = expense.paidFors;
     for (let i = 0; i < paidForsArr.length; i++) {
         const paidFor = paidForsArr[i];
         await sql`
@@ -149,15 +153,15 @@ export const postExpense = async (expense: Expense, newMembers: Map<string, Memb
 
 export const patchExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
     const expenseMembers = [
-        ...expense.paid_fors.map(f => f.member_id),
-        expense.paid_by,
+        ...expense.paidFors.map(f => f.member_id),
+        expense.paidBy,
     ];
     const newMembersArr = [...newMembers.values()].filter(e => expenseMembers.includes(e.id));
     for (let i = 0; i < newMembersArr.length; i++) {
         const newNember = newMembersArr[i];
         await sql`
             INSERT INTO pay_up.members (id, project_id, name) 
-            VALUES (${newNember.id}, ${expense.project_id}, ${newNember.name})
+            VALUES (${newNember.id}, ${expense.projectId}, ${newNember.name})
         `;
     };
 
@@ -167,18 +171,18 @@ export const patchExpense = async (expense: Expense, newMembers: Map<string, Mem
             title=${expense.title || 'Untitled'},
             amount=${expense.amount},
             currency=${expense.currency},
-            paid_by=${expense.paid_by},
+            paid_by=${expense.paidBy},
             time=${expense.time},
-            is_excluded=${expense.is_excluded},
+            is_excluded=${expense.isExcluded},
             description=${expense.description},
-            discount_value=${expense.discount_value},
-            discount_type=${expense.discount_type}
+            discount_value=${expense.discountValue},
+            discount_type=${expense.discountType}
         WHERE id=${expense.id}
     `;
 
     await sql`DELETE FROM pay_up.paid_fors WHERE expense_id=${expense.id}`;
 
-    const paidForsArr = expense.paid_fors;
+    const paidForsArr = expense.paidFors;
     for (let i = 0; i < paidForsArr.length; i++) {
         const paidFor = paidForsArr[i];
         await sql`
@@ -188,19 +192,19 @@ export const patchExpense = async (expense: Expense, newMembers: Map<string, Mem
     };
 }
 
-export const deleteExpense = async (expense_id: string) => {
-    await sql`DELETE FROM pay_up.expenses WHERE id=${expense_id}`;
+export const deleteExpense = async (expenseId: string) => {
+    await sql`DELETE FROM pay_up.expenses WHERE id=${expenseId}`;
 }
 
-export const getExchanges = async (project_id: string): Promise<Exchange[]> => {
+export const getExchanges = async (projectId: string): Promise<Exchange[]> => {
     return [
         {
-            project_id,
+            projectId: projectId,
             currency: 'JPY',
             rate: 170,
         },
         {
-            project_id,
+            projectId: projectId,
             currency: 'VND',
             rate: 1,
         },
