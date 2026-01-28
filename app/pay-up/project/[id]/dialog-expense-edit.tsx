@@ -1,10 +1,11 @@
+import { NumberField } from "@/app/_libs/common";
 import { useToast } from "@/app/_libs/contexts";
 import { Autocomplete, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, FormGroup, Grid, List, ListItemButton, ListSubheader, Menu, Stack, TextField, useMediaQuery, useTheme } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
 import { v4 } from "uuid";
-import { useCurrencies, useExchanges, useMembers, useProject } from "../../_libs/contexts";
+import { useExchanges, useMembers, useProject } from "../../_libs/contexts";
 import { patchExpense, postExpense } from "../../_libs/data";
 import { DiscountType, Expense, Member, newExpense, PaidFor } from "../../_libs/models";
 
@@ -21,9 +22,8 @@ export function DialogExpenseEdit({
 }) {
     const project = useProject();
     const members = useMembers();
-    const currencies = useCurrencies();
     const exchanges = useExchanges();
-    const [item, setItem] = useState<Expense>(expense ? { ...expense } : newExpense(project));
+    const [item, setItem] = useState<Expense>(expense ? structuredClone(expense) : newExpense(project));
     const [loading, setLoading] = useState(false);
     const [anchor, setAnchor] = useState<HTMLElement>();
     const [anchor2, setAnchor2] = useState<HTMLElement>();
@@ -136,14 +136,11 @@ export function DialogExpenseEdit({
                             onChange={e => setItem({ ...item, time: (e ?? dayjs()).toDate() })}
                             ampm={false}
                         />
-                        <TextField
+                        <NumberField
                             label="Amount"
-                            type="number"
                             value={item.amount}
-                            onChange={e => {
-                                const value = Number(e.target.value);
-                                if (value >= 0) setItem({ ...item, amount: value });
-                            }}
+                            onChange={e => setItem({ ...item, amount: e ?? 0 })}
+                            min={0}
                             slotProps={{
                                 input: {
                                     endAdornment:
@@ -203,20 +200,11 @@ export function DialogExpenseEdit({
                         />
                         <Grid container spacing={2}>
                             <Grid size={6}>
-                                <TextField
+                                <NumberField
                                     label="Discount"
-                                    type="number"
                                     value={item.discountValue}
-                                    onChange={e => {
-                                        const value = Number(e.target.value);
-                                        if (
-                                            value >= 0 && (
-                                                (item.discountType === DiscountType.Percent && value <= 100) ||
-                                                (item.discountType === DiscountType.Amount && value <= item.amount)
-                                            )
-                                        )
-                                            setItem({ ...item, discountValue: value });
-                                    }}
+                                    onChange={e => setItem({ ...item, discountValue: e ?? 0 })}
+                                    min={0} max={item.discountType === DiscountType.Amount ? item.amount : 100}
                                     slotProps={{
                                         input: {
                                             endAdornment:
@@ -236,14 +224,15 @@ export function DialogExpenseEdit({
                             </Grid>
                             <Grid size={6}>
                                 {item.paidFors.length > 1 &&
-                                    <TextField
+                                    <NumberField
+                                        id={String(paidForIdx)}
                                         label="Weight of"
-                                        type="number"
                                         value={item.paidFors[paidForIdx].weight}
                                         onChange={e => {
-                                            item.paidFors[paidForIdx].weight = Number(e.target.value);
+                                            item.paidFors[paidForIdx].weight = (e ?? 0);
                                             setItem({ ...item });
                                         }}
+                                        min={0}
                                         slotProps={{
                                             input: {
                                                 startAdornment:
@@ -259,7 +248,8 @@ export function DialogExpenseEdit({
                                             },
                                         }}
                                         fullWidth
-                                    />}
+                                    />
+                                }
                             </Grid>
                         </Grid>
                     </Stack>
@@ -277,12 +267,6 @@ export function DialogExpenseEdit({
                     </ListItemButton>
                     <ListSubheader>Exchange currencies</ListSubheader>
                     {exchanges.filter(e => e.currency !== project.currency).map((e, i) =>
-                        <ListItemButton key={i} onClick={() => handleChangeCurr(e.currency)}>
-                            {e.currency}
-                        </ListItemButton>
-                    )}
-                    <ListSubheader>All currencies</ListSubheader>
-                    {currencies.map((e, i) =>
                         <ListItemButton key={i} onClick={() => handleChangeCurr(e.currency)}>
                             {e.currency}
                         </ListItemButton>

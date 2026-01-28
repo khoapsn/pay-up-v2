@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, Icon, IconButton, Stack, Tooltip, Typogr
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CurrenciesContext, ExchangesContext, MembersContext, ProjectContext, useProject } from "../../_libs/contexts";
-import { getCurrencies, getExchanges, getMembers, getProject } from "../../_libs/data";
-import { Currency, Exchange, Member, Project } from "../../_libs/models";
+import { ExchangesContext, MembersContext, ProjectContext, useProject } from "../../_libs/contexts";
+import { getExchanges, getMembers, getProject } from "../../_libs/data";
+import { Exchange, Member, Project } from "../../_libs/models";
 import { storeProject } from "../../_libs/utils";
 import CardExpenses from "./card-expenses";
 import DialogCurrencies from "./dialog-currencies";
@@ -19,7 +19,6 @@ export default function Page() {
     const [project, setProject] = useState<Project>();
     const [members, setMembers] = useState<Map<string, Member>>();
     const [exchanges, setExchanges] = useState<Exchange[]>();
-    const [curr, setCurr] = useState<Currency[]>([]);
     const toast = useToast();
 
     const refresh = async () => {
@@ -49,22 +48,13 @@ export default function Page() {
     };
 
     useEffect(() => {
-        const init = async () => {
-            try {
-                setCurr(await getCurrencies());
-            } catch (e) {
-                toast('Error', String(e), 'error');
-            }
-        };
-
-        init();
         refresh();
         refreshMembers();
         refreshExchanges();
     }, []);
 
     return (
-        <CurrenciesContext.Provider value={curr}>
+        <>
             {project && members && exchanges &&
                 <ProjectContext.Provider value={project}>
                     <MembersContext.Provider value={members}>
@@ -83,7 +73,7 @@ export default function Page() {
                     </MembersContext.Provider>
                 </ProjectContext.Provider>
             }
-        </CurrenciesContext.Provider>
+        </>
     );
 }
 

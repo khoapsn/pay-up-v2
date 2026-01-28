@@ -1,8 +1,9 @@
 import { useToast } from "@/app/_libs/contexts";
-import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Icon, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Icon, IconButton, List, ListItem, ListItemText, Stack, TextField } from "@mui/material";
 import { useState } from "react";
-import { useCurrencies, useExchanges, useProject } from "../../_libs/contexts";
+import { useExchanges, useProject } from "../../_libs/contexts";
 import { patchProjectCurrency } from "../../_libs/data";
+import { NumberField } from "@/app/_libs/common";
 
 export default function DialogCurrencies({
     onChange,
@@ -16,9 +17,8 @@ export default function DialogCurrencies({
     const project = useProject();
     const exchanges = useExchanges();
     const [curr, setCurr] = useState(project.currency);
-    const [exCurr, setExCurr] = useState<string | null>(null);
-    const [rate, setRate] = useState(1);
-    const currs = useCurrencies();
+    const [exCurr, setExCurr] = useState('');
+    const [rate, setRate] = useState<number | null>(1);
     const toast = useToast();
 
     const handleClick = async () => {
@@ -35,7 +35,7 @@ export default function DialogCurrencies({
         try {
             // TODO
             await onChangeExchanges();
-            setExCurr(null);
+            setExCurr('');
             setRate(1);
             toast('Success', 'Exchange rate updated.');
         } catch (e) {
@@ -48,15 +48,14 @@ export default function DialogCurrencies({
             <DialogTitle>Currencies</DialogTitle>
             <DialogContent dividers>
                 <Stack spacing={2} mb={3}>
-                    <Autocomplete
+                    <TextField
+                        label="Base currency"
                         value={curr}
-                        onChange={(_, v) => { if (v) setCurr(v); }}
-                        options={currs.map(e => e.currency)}
-                        renderInput={params => <TextField {...params} label="Base currency" />}
+                        onChange={e => setCurr(e.target.value)}
                     />
                     <Button
                         onClick={handleClick}
-                        disabled={curr === project.currency}
+                        disabled={!curr || curr === project.currency}
                         variant="contained"
                     >
                         Save
@@ -64,21 +63,22 @@ export default function DialogCurrencies({
                 </Stack>
                 <Divider />
                 <Stack spacing={2} mt={3}>
-                    <Autocomplete
-                        value={exCurr}
-                        onChange={(_, v) => setExCurr(v)}
-                        options={currs.map(e => e.currency)}
-                        renderInput={params => <TextField {...params} label="Exchange currency" />}
-                    />
                     <TextField
+                        label="Exchange currency"
+                        value={exCurr}
+                        onChange={e => setExCurr(e.target.value)}
+                    />
+                    <NumberField
                         label="Exchange rate"
-                        type="number"
                         value={rate}
-                        onChange={e => {
-                            const value = Number(e.target.value);
-                            if (value >= 0) setRate(value);
+                        onChange={e => setRate(e)}
+                        min={0} max={999999}
+                        slotProps={{
+                            input: {
+                                endAdornment:
+                                    <span style={{ marginLeft: 8 }}>token(s)</span>,
+                            },
                         }}
-                        slotProps={{ input: { endAdornment: 'token(s)' } }}
                     />
                     <Button
                         onClick={handleAddExchange}
