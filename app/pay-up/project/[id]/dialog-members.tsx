@@ -107,7 +107,11 @@ export default function DialogMembers({
                                 }
                                 disableGutters
                             >
-                                <ListItemAvatar><Avatar sx={{ bgcolor: e.isActive ? 'primary.light' : undefined }}>{e.name[0]}</Avatar></ListItemAvatar>
+                                <ListItemAvatar>
+                                    <Avatar sx={{ bgcolor: e.isActive ? 'primary.light' : undefined }}>
+                                        {e.name[0]}
+                                    </Avatar>
+                                </ListItemAvatar>
                                 <ListItemText>{e.name}</ListItemText>
                             </ListItem>
                         )}

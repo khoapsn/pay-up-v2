@@ -35,15 +35,10 @@ export const getTotalSpent = (expenses: Expense[], baseCurrency: string, exchang
         .reduce((p, c) => p + convertAmount(getAmountAfterDiscount(c.amount, c.discountValue, c.discountType), c.currency, baseCurrency, exchanges), 0);
 }
 
-const getTotalPaidOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number => {
+export const getTotalPaidOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number => {
     return expenses
         .filter(e => e.paidBy === memberId)
-        .reduce((p, c) => p + getPaidOf(c, baseCurrency, exchanges), 0);
-}
-
-const getPaidOf = (expense: Expense, baseCurrency: string, exchanges: Exchange[]): number => {
-    const amountOf = getAmountAfterDiscount(expense.amount, expense.discountValue, expense.discountType);
-    return convertAmount(amountOf, expense.currency, baseCurrency, exchanges);;
+        .reduce((p, c) => p + convertAmount(getAmountAfterDiscount(c.amount, c.discountValue, c.discountType), c.currency, baseCurrency, exchanges), 0);
 }
 
 export const getTotalSpentOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[], isFiltered: boolean = false): number => {
@@ -52,7 +47,7 @@ export const getTotalSpentOf = (memberId: string, expenses: Expense[], baseCurre
         .reduce((p, c) => p + getSpentOf(memberId, c, baseCurrency, exchanges), 0);
 }
 
-const getSpentOf = (memberId: string, expense: Expense, baseCurrency: string, exchanges: Exchange[]): number => {
+export const getSpentOf = (memberId: string, expense: Expense, baseCurrency: string, exchanges: Exchange[]): number => {
     const totalWeight = expense.paidFors.reduce((p, c) => p + c.weight, 0);
     const ratio = (expense.paidFors.find(e => e.member_id === memberId)?.weight ?? 0) / totalWeight;
     const amountOf = getAmountAfterDiscount(expense.amount, expense.discountValue, expense.discountType) * ratio;

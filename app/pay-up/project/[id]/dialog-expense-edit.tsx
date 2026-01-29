@@ -261,11 +261,10 @@ export function DialogExpenseEdit({
             </Dialog>
             <Menu open={!!anchor} anchorEl={anchor} onClose={() => setAnchor(undefined)}>
                 <List>
-                    <ListSubheader>Base currency</ListSubheader>
                     <ListItemButton onClick={() => handleChangeCurr(project.currency)}>
                         {project.currency}
                     </ListItemButton>
-                    <ListSubheader>Exchange currencies</ListSubheader>
+                    <Divider variant="middle" />
                     {exchanges.filter(e => e.currency !== project.currency).map((e, i) =>
                         <ListItemButton key={i} onClick={() => handleChangeCurr(e.currency)}>
                             {e.currency}
