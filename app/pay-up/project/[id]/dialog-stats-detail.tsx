@@ -92,9 +92,9 @@ export default function DialogStatsDetail({
                         <DataGrid
                             columns={columns}
                             rows={rows}
-                            showToolbar
+                            initialState={{ sorting: { sortModel: [{ field: 'time', sort: 'asc' }] } }}
                             density="compact"
-                            autoHeight
+                            showToolbar autoHeight
                         />
                     </DialogContent>
                     <DialogActions>

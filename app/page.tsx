@@ -12,7 +12,7 @@ export default function Page() {
             <AppBar position="fixed" sx={{ zIndex: 1 }}>
                 <Toolbar>
                     <Typography variant="h6" component="div" fontWeight={700} sx={{ flexGrow: 1 }}>
-                        happy place
+                        pay up!
                     </Typography>
                 </Toolbar>
             </AppBar>

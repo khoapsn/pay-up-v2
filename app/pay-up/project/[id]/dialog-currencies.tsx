@@ -1,9 +1,9 @@
+import { NumberField } from "@/app/_libs/common";
 import { useToast } from "@/app/_libs/contexts";
-import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Icon, IconButton, List, ListItem, ListItemText, Stack, TextField } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Icon, IconButton, List, ListItem, ListItemText, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import { useExchanges, useProject } from "../../_libs/contexts";
-import { patchProjectCurrency } from "../../_libs/data";
-import { NumberField } from "@/app/_libs/common";
+import { deleteExchange, patchProjectCurrency, postExchange } from "../../_libs/data";
 
 export default function DialogCurrencies({
     onChange,
@@ -19,25 +19,43 @@ export default function DialogCurrencies({
     const [curr, setCurr] = useState(project.currency);
     const [exCurr, setExCurr] = useState('');
     const [rate, setRate] = useState<number | null>(1);
+    const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
     const toast = useToast();
 
     const handleClick = async () => {
         try {
+            setLoading(true);
             await patchProjectCurrency(project.id, curr);
             await onChange();
             toast('Success', 'Base currency changed.');
         } catch (e) {
             toast('Error', String(e), 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleAddExchange = async () => {
         try {
-            // TODO
+            setLoading2(true);
+            await postExchange(project.id, exCurr, rate ?? 1);
             await onChangeExchanges();
             setExCurr('');
             setRate(1);
-            toast('Success', 'Exchange rate updated.');
+            toast('Success', 'Exchange rate added.');
+        } catch (e) {
+            toast('Error', String(e), 'error');
+        } finally {
+            setLoading2(false);
+        }
+    }
+
+    const handleDelExchange = async (currency: string) => {
+        try {
+            await deleteExchange(project.id, currency);
+            await onChangeExchanges();
+            toast('Success', 'Exchange rate deleted.');
         } catch (e) {
             toast('Error', String(e), 'error');
         }
@@ -51,11 +69,12 @@ export default function DialogCurrencies({
                     <TextField
                         label="Base currency"
                         value={curr}
-                        onChange={e => setCurr(e.target.value)}
+                        onChange={e => setCurr(e.target.value.toUpperCase().trim())}
                     />
                     <Button
                         onClick={handleClick}
                         disabled={!curr || curr === project.currency}
+                        loading={loading}
                         variant="contained"
                     >
                         Save
@@ -66,9 +85,10 @@ export default function DialogCurrencies({
                     <TextField
                         label="Exchange currency"
                         value={exCurr}
-                        onChange={e => setExCurr(e.target.value)}
+                        onChange={e => setExCurr(e.target.value.toUpperCase().trim())}
                     />
                     <NumberField
+                        id={exchanges.length.toString()}
                         label="Exchange rate"
                         value={rate}
                         onChange={e => setRate(e)}
@@ -83,21 +103,29 @@ export default function DialogCurrencies({
                     <Button
                         onClick={handleAddExchange}
                         disabled={!exCurr || !rate || (rate <= 0)}
+                        loading={loading2}
                         variant="contained"
                     >
-                        Add / Update
+                        Add
                     </Button>
                     <List disablePadding>
                         {exchanges.map(e =>
                             <ListItem
                                 key={e.currency}
-                                secondaryAction={<IconButton edge="end"><Icon>close</Icon></IconButton>}
+                                secondaryAction={
+                                    <IconButton
+                                        onClick={f => handleDelExchange(e.currency)}
+                                        edge="end"
+                                    >
+                                        <Icon>close</Icon>
+                                    </IconButton>
+                                }
                                 disablePadding
                                 disableGutters
                             >
                                 <ListItemText
                                     primary={e.currency}
-                                    secondary={`1 ${e.currency} = ${e.rate} token${e.rate > 1 ? 's' : ''}`}
+                                    secondary={`1 ${e.currency} = ${e.rate.toLocaleString()} token${e.rate > 1 ? 's' : ''}`}
                                 />
                             </ListItem>
                         )}

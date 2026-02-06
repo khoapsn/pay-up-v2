@@ -90,24 +90,20 @@ export const getExpenses = async (projectId: string): Promise<Expense[]> => {
         ORDER BY a.time DESC
     `;
 
-    return data.map(e => {
-        const expense: Expense = {
-            id: e.id,
-            projectId: e.project_id,
-            title: e.title,
-            description: e.description,
-            amount: Number(e.amount),
-            currency: e.currency,
-            paidBy: e.paid_by,
-            paidFors: e.paid_fors,
-            time: e.time,
-            isExcluded: e.is_excluded,
-            discountType: e.discount_type,
-            discountValue: Number(e.discount_value),
-        };
-
-        return expense;
-    })
+    return data.map(e => ({
+        id: e.id,
+        projectId: e.project_id,
+        title: e.title,
+        description: e.description,
+        amount: Number(e.amount),
+        currency: e.currency,
+        paidBy: e.paid_by,
+        paidFors: e.paid_fors,
+        time: e.time,
+        isExcluded: e.is_excluded,
+        discountType: e.discount_type,
+        discountValue: Number(e.discount_value),
+    }));
 }
 
 export const postExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
@@ -197,18 +193,21 @@ export const deleteExpense = async (expenseId: string) => {
 }
 
 export const getExchanges = async (projectId: string): Promise<Exchange[]> => {
-    return [
-        {
-            projectId: projectId,
-            currency: 'JPY',
-            rate: 170,
-        },
-        {
-            projectId: projectId,
-            currency: 'VND',
-            rate: 1,
-        },
-    ];
+    const data = await sql`SELECT * FROM pay_up.exchanges WHERE project_id=${projectId}`;
+
+    return data.map(e => ({
+        projectId: e.project_id,
+        currency: e.currency,
+        rate: Number(e.rate),
+    }));
+}
+
+export const postExchange = async (projectId: string, currency: string, rate: number) => {
+    await sql`INSERT INTO pay_up.exchanges (project_id, currency, rate) VALUES (${projectId}, ${currency}, ${rate})`;
+}
+
+export const deleteExchange = async (projectId: string, currency: string) => {
+    await sql`DELETE FROM pay_up.exchanges WHERE project_id=${projectId} AND currency=${currency}`;
 }
 
 export const getCurrencies = async (): Promise<Currency[]> => {
