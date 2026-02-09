@@ -54,5 +54,7 @@ export const getSpentOf = (memberId: string, expense: Expense, baseCurrency: str
     return convertAmount(amountOf, expense.currency, baseCurrency, exchanges);
 }
 
-export const getBalanceOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number =>
-    getTotalPaidOf(memberId, expenses, baseCurrency, exchanges) - getTotalSpentOf(memberId, expenses, baseCurrency, exchanges);
+export const getBalanceOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number => {
+    const value = getTotalPaidOf(memberId, expenses, baseCurrency, exchanges) - getTotalSpentOf(memberId, expenses, baseCurrency, exchanges);
+    return Number(value.toFixed(2));
+}

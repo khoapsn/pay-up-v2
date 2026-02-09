@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { Avatar, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useExchanges, useExpenses, useMembers, useProject } from "../../_libs/contexts";
 import { getBalanceOf, getTotalSpent, getTotalSpentOf } from "../../_libs/utils";
 import { useState } from "react";
@@ -47,9 +47,12 @@ export default function DialogStats({ onClose }: { onClose: () => void }) {
                                     </ListItemText>
                                     <ListItemText
                                         secondary={
-                                            <Typography variant="body2" color={balance > 0 ? 'success' : balance < 0 ? 'error' : 'primary'}>
-                                                {balance > 0 && '+'}{(balance || '--').toLocaleString()}
-                                            </Typography>
+                                            <Chip
+                                                label={`Balance: ${balance > 0 ? '+' : ''}${(balance || '--').toLocaleString()}`}
+                                                color={balance > 0 ? 'success' : balance < 0 ? 'error' : 'default'}
+                                                size="small" variant="outlined" sx={{ height: 1 }}
+                                                component={"span"}
+                                            />
                                         }
                                         sx={{ textAlign: 'end', color: 'primary.main' }}
                                     >

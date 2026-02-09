@@ -1,14 +1,20 @@
 'use client';
 
 import { AppBar, Button, Container, createTheme, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItemButton, ListItemText, TextField, ThemeProvider, Toolbar, Typography } from "@mui/material";
+import { teal as primary } from "@mui/material/colors";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { useToast } from "../_libs/contexts";
 import { postProject } from "./_libs/data";
 import { Project } from "./_libs/models";
 import { retrieveProjects } from "./_libs/utils";
+import Image from "next/image";
 
-const theme = createTheme({});
+const theme = createTheme({
+    palette: {
+        primary,
+    },
+});
 
 export default function LayoutClient({ children }: { children: ReactNode }) {
     return (
@@ -42,7 +48,8 @@ function Header() {
         <>
             <AppBar position="fixed" sx={{ zIndex: 2 }}>
                 <Toolbar>
-                    <Typography variant="h6" component="div" fontWeight={700} sx={{ flexGrow: 1 }}>
+                    <Image src={"/images/pay-up.png"} alt="icon" width={50} height={50} />
+                    <Typography variant="h6" component="div" fontWeight={700} sx={{ flexGrow: 1, ml: 1 }}>
                         pay up!
                     </Typography>
                     <IconButton onClick={() => setOpenNew(true)} sx={{ color: 'primary.contrastText' }}>
