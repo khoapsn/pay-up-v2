@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const url = 'http://api.airvisual.com/v2/city?city=Hanoi&state=Hanoi&country=Vietnam&key=82350757-0540-49aa-82c9-48bf1594612e';
+export const url = 'http://api.airvisual.com/v2/city?city=Hanoi&state=Ha%20Noi&country=Vietnam&key=82350757-0540-49aa-82c9-48bf1594612e';
 
 export async function GET() {
     const data = await fetch(url);
