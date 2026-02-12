@@ -56,5 +56,5 @@ export const getSpentOf = (memberId: string, expense: Expense, baseCurrency: str
 
 export const getBalanceOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number => {
     const value = getTotalPaidOf(memberId, expenses, baseCurrency, exchanges) - getTotalSpentOf(memberId, expenses, baseCurrency, exchanges);
-    return Number(value.toFixed(2));
+    return Math.abs(value) >= 0.1 ? value : 0;
 }
