@@ -106,7 +106,7 @@ export const getExpenses = async (projectId: string): Promise<Expense[]> => {
     }));
 }
 
-export const postExpense = async (expense: Expense, newMembers: Map<string, Member>) => {
+export const postExpense = async (expense: Expense, newMembers: Map<string, Member> = new Map()) => {
     const expenseMembers = [
         ...expense.paidFors.map(f => f.member_id),
         expense.paidBy,

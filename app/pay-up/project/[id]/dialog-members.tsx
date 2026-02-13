@@ -125,7 +125,7 @@ export default function DialogMembers({
                 <Menu open anchorEl={anchor} onClose={() => setAnchor(undefined)}>
                     <MenuItem onClick={handleRename}>Rename</MenuItem>
                     <MenuItem onClick={handleHide}>{member.isActive ? 'Hide' : 'Unhide'}</MenuItem>
-                    <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                    <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>Delete</MenuItem>
                 </Menu>
             }
             {member && open &&

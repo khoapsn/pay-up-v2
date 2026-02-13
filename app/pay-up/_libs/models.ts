@@ -45,6 +45,20 @@ export const newExpense = (project: Project): Expense => ({
     discountValue: 0,
 })
 
+export const newExcludedExpense = (project: Project, member: Member, amount: number): Expense => ({
+    id: '',
+    projectId: project.id,
+    title: `${member.name} paid`,
+    amount,
+    currency: project.currency,
+    paidBy: member.id,
+    paidFors: [],
+    time: new Date(),
+    isExcluded: true,
+    discountType: DiscountType.Percent,
+    discountValue: 0,
+})
+
 export type PaidFor = {
     member_id: string,
     weight: number,

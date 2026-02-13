@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, Divider, Icon, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, Divider, List, ListItem, ListItemText, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useExchanges, useMembers, useProject } from "../../_libs/contexts";

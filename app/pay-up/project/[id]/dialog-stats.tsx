@@ -1,20 +1,28 @@
-import { Avatar, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Icon, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useExchanges, useExpenses, useMembers, useProject } from "../../_libs/contexts";
 import { getBalanceOf, getTotalSpent, getTotalSpentOf } from "../../_libs/utils";
 import { useState } from "react";
 import DialogStatsDetail from "./dialog-stats-detail";
 
-export default function DialogStats({ onClose }: { onClose: () => void }) {
+export default function DialogStats({
+    onChange,
+    onClose,
+}: {
+    onChange: () => Promise<void>,
+    onClose: () => void,
+}) {
     const project = useProject();
     const expenses = useExpenses();
     const exchanges = useExchanges();
     const members = useMembers();
     const total = getTotalSpent(expenses, project.currency, exchanges);
     const [memId, setMemId] = useState<string>();
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
     return (
         <>
-            <Dialog open onClose={onClose} fullWidth>
+            <Dialog open onClose={onClose} fullWidth fullScreen={fullScreen}>
                 <DialogTitle>
                     Stats
                 </DialogTitle>
@@ -70,6 +78,7 @@ export default function DialogStats({ onClose }: { onClose: () => void }) {
             {memId &&
                 <DialogStatsDetail
                     memId={memId}
+                    onChange={onChange}
                     onClose={() => setMemId(undefined)}
                 />
             }

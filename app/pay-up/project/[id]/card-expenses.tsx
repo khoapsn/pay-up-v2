@@ -45,7 +45,7 @@ export default function CardExpenses({ onChangeMembers }: { onChangeMembers: () 
             {expenses &&
                 <ExpensesContext.Provider value={expenses}>
                     <Stack spacing={2}>
-                        <CardSummary />
+                        <CardSummary onChange={refresh} />
                         <Card>
                             <CardHeader
                                 title="Expenses"
@@ -125,7 +125,7 @@ export default function CardExpenses({ onChangeMembers }: { onChangeMembers: () 
     );
 }
 
-function CardSummary() {
+function CardSummary({ onChange }: { onChange: () => Promise<void> }) {
     const project = useProject();
     const expenses = useExpenses();
     const exchanges = useExchanges();
@@ -152,7 +152,10 @@ function CardSummary() {
                 </CardContent>
             </Card>
             {open &&
-                <DialogStats onClose={() => setOpen(false)} />
+                <DialogStats
+                    onChange={onChange}
+                    onClose={() => setOpen(false)}
+                />
             }
         </>
     );
