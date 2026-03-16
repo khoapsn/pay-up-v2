@@ -63,7 +63,7 @@ function Header() {
             <Toolbar />
             {projects &&
                 <Dialog open onClose={() => setProjects(undefined)} fullWidth maxWidth="xs">
-                    <DialogTitle>Open project</DialogTitle>
+                    <DialogTitle>Open Project</DialogTitle>
                     <DialogContent dividers>
                         <List>
                             {projects.map((e, i) =>

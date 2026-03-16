@@ -75,7 +75,7 @@ function Header() {
             <Toolbar />
             {profiles &&
                 <Dialog open onClose={() => setProfiles(undefined)} fullWidth maxWidth="xs">
-                    <DialogTitle>Open profile</DialogTitle>
+                    <DialogTitle>Open Profile</DialogTitle>
                     <DialogContent dividers>
                         <List>
                             {profiles.map((e, i) =>
