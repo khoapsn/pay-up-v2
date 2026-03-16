@@ -1,6 +1,7 @@
 import { NumberField } from "@/app/_libs/common";
 import { useToast } from "@/app/_libs/contexts";
 import { Autocomplete, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, FormGroup, Grid, List, ListItemButton, Menu, Stack, TextField, useMediaQuery, useTheme } from "@mui/material";
+import { PieChart, PieSeries } from "@mui/x-charts/PieChart";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
@@ -37,6 +38,14 @@ export function DialogExpenseEdit({
     const newMembersRef = useRef(new Map<string, Member>());
     const allMembersMap = new Map([...members.entries(), ...newMembersRef.current.entries()]);
     const allMembersArr = [...members.values(), ...newMembersRef.current.values()];
+
+    const series: PieSeries[] = [
+        {
+            arcLabel: 'label',
+            valueFormatter: e => `×${e.value}`,
+            data: item.paidFors.map(e => ({ id: e.member_id, value: e.weight, label: allMembersMap.get(e.member_id)?.name })),
+        },
+    ];
 
     const handleClick = async () => {
         try {
@@ -178,6 +187,7 @@ export function DialogExpenseEdit({
                             onChange={handleChangePaidFors}
                             renderInput={params => <TextField {...params} label="Paid for" />}
                             disableCloseOnSelect
+                            filterSelectedOptions
                         />
                         <Divider>Extra Info</Divider>
                         <FormGroup>
@@ -235,12 +245,13 @@ export function DialogExpenseEdit({
                                         min={0}
                                         slotProps={{
                                             input: {
-                                                startAdornment:
+                                                startAdornment: <span>×</span>,
+                                                endAdornment:
                                                     <Button
                                                         onClick={e => setAnchor2(e.currentTarget)}
                                                         variant="contained"
                                                         color="inherit"
-                                                        sx={{ mr: 1 }}
+                                                        sx={{ ml: 1 }}
                                                         disableElevation
                                                     >
                                                         {allMembersMap.get(item.paidFors[paidForIdx].member_id)?.name}
@@ -252,6 +263,14 @@ export function DialogExpenseEdit({
                                 }
                             </Grid>
                         </Grid>
+                        {item.paidFors.length > 1 &&
+                            <PieChart
+                                series={series}
+                                onItemClick={(_, p) => setPaidForIdx(p.dataIndex)}
+                                height={200}
+                                hideLegend
+                            />
+                        }
                     </Stack>
                 </DialogContent>
                 <DialogActions>
