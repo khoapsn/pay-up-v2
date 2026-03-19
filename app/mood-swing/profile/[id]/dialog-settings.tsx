@@ -47,7 +47,7 @@ export default function DialogSettings({
                     />
                     <FormGroup>
                         <FormControlLabel
-                            label="Week start on Sunday"
+                            label="Week starts on Sunday"
                             control={
                                 <Switch
                                     checked={item.week_start_on_sunday}
