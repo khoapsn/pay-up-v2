@@ -47,11 +47,11 @@ export const getTotalSpentOf = (memberId: string, expenses: Expense[], baseCurre
         .reduce((p, c) => p + getSpentOf(memberId, c, baseCurrency, exchanges), 0);
 }
 
-export const getSpentOf = (memberId: string, expense: Expense, baseCurrency: string, exchanges: Exchange[]): number => {
+export const getSpentOf = (memberId: string, expense: Expense, toCurrency: string, exchanges: Exchange[] = []): number => {
     const totalWeight = expense.paidFors.reduce((p, c) => p + c.weight, 0);
     const ratio = (expense.paidFors.find(e => e.member_id === memberId)?.weight ?? 0) / totalWeight;
     const amountOf = getAmountAfterDiscount(expense.amount, expense.discountValue, expense.discountType) * ratio;
-    return convertAmount(amountOf, expense.currency, baseCurrency, exchanges);
+    return convertAmount(amountOf, expense.currency, toCurrency, exchanges);
 }
 
 export const getBalanceOf = (memberId: string, expenses: Expense[], baseCurrency: string, exchanges: Exchange[]): number => {

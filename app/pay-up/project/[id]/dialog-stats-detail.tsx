@@ -50,6 +50,28 @@ export default function DialogStatsDetail({
             flex: 1,
         },
         {
+            field: 'paidOrg',
+            headerName: 'Paid (Org.)',
+            type: 'number',
+            valueGetter: (_, row: Expense) =>
+                row.paidBy === memId ? getAmountAfterDiscount(row.amount, row.discountValue, row.discountType) : undefined,
+            renderCell: (e: GridRenderCellParams) =>
+                <span style={{ color: theme.palette.success.light }}>{e.value?.toLocaleString()}</span>,
+        },
+        {
+            field: 'spentOrg',
+            headerName: 'Spent (Org.)',
+            type: 'number',
+            valueGetter: (_, row: Expense) =>
+                getSpentOf(memId, row, row.currency) || undefined,
+            renderCell: (e: GridRenderCellParams<Expense>) =>
+                <span style={{ color: theme.palette.error.light, fontStyle: e.row.isExcluded ? 'italic' : 'normal' }}>{e.value?.toLocaleString()}</span>,
+        },
+        {
+            field: 'currency',
+            headerName: 'Currency',
+        },
+        {
             field: 'paid',
             headerName: 'Paid',
             type: 'number',
@@ -100,7 +122,17 @@ export default function DialogStatsDetail({
                             <DataGrid
                                 columns={columns}
                                 rows={rows}
-                                initialState={{ sorting: { sortModel: [{ field: 'time', sort: 'desc' }] } }}
+                                initialState={{
+                                    columns: {
+                                        columnVisibilityModel: {
+                                            paidOrg: false,
+                                            spentOrg: false,
+                                            currency: false,
+                                        },
+                                    },
+                                    sorting: { sortModel: [{ field: 'time', sort: 'desc' }] },
+                                }}
+                                slotProps={{ toolbar: { csvOptions: { allColumns: true } } }}
                                 density="compact"
                                 showToolbar autoHeight
                             />
