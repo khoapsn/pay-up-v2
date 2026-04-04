@@ -95,7 +95,7 @@ export default function DialogStatsDetail({
         <>
             {member &&
                 <>
-                    <Dialog open onClose={onClose} fullWidth fullScreen={fullScreen}>
+                    <Dialog open onClose={onClose} fullWidth maxWidth="md" fullScreen={fullScreen}>
                         <DialogTitle>Expenses of {member.name}</DialogTitle>
                         <DialogContent dividers>
                             <Box textAlign={"end"}>
