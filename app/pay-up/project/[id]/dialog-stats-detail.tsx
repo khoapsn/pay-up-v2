@@ -50,6 +50,11 @@ export default function DialogStatsDetail({
             flex: 1,
         },
         {
+            field: 'paidBy',
+            headerName: 'Paid By',
+            valueGetter: e => members.get(e)?.name,
+        },
+        {
             field: 'paidOrg',
             headerName: 'Paid (Org.)',
             type: 'number',
@@ -125,6 +130,7 @@ export default function DialogStatsDetail({
                                 initialState={{
                                     columns: {
                                         columnVisibilityModel: {
+                                            paidBy: false,
                                             paidOrg: false,
                                             spentOrg: false,
                                             currency: false,
